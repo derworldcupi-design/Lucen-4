@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#02060a">
+  <title>LUCEN — AI Assistant</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #02060a;
+      color: #dffcff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      position: relative;
+    }
+
+    /* ===== BACKGROUND ===== */
+
+    .background {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(0,180,255,.12), transparent 32%),
+        radial-gradient(circle at 50% 50%, rgba(0,255,255,.04), transparent 55%),
+        #02060a;
+    }
+
+    .grid {
+      position: absolute;
+      inset: -50%;
+      opacity: .18;
+      background-image:
+        linear-gradient(rgba(0,200,255,.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,.16) 1px, transparent 1px);
+      background-size: 42px 42px;
+      transform: perspective(500px) rotateX(60deg);
+      transform-origin: center;
+    }
+
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(255,255,255,.018) 4px
+      );
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(
+        circle,
+        transparent 45%,
+        rgba(0,0,0,.72) 100%
+      );
+    }
+
+    /* ===== APP ===== */
+
+    .app {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding:
+        calc(env(safe-area-inset-top) + 14px)
+        16px
+        calc(env(safe-area-inset-bottom) + 14px);
+    }
+
+    /* ===== TOP BAR ===== */
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brandMark {
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(0,230,255,.7);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      box-shadow:
+        0 0 12px rgba(0,220,255,.35),
+        inset 0 0 12px rgba(0,220,255,.12);
+      animation: pulse 2.5s infinite;
+    }
+
+    .brandMark::before {
+      content: "";
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #70efff;
+      box-shadow: 0 0 18px #00d9ff;
+    }
+
+    .brandText {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: 5px;
+    }
+
+    .status {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #69eaff;
+      text-align: right;
+    }
+
+    .statusDot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #5affdc;
+      box-shadow: 0 0 10px #5affdc;
+      margin-right: 5px;
+    }
+
+    /* ===== CORE ===== */
+
+    .coreArea {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .core {
+      width: min(72vw, 310px);
+      aspect-ratio: 1;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(0,220,255,.45);
+    }
+
+    .ring.one {
+      inset: 3%;
+      border-right-color: transparent;
+      animation: spin 8s linear infinite;
+    }
+
+    .ring.two {
+      inset: 11%;
+      border-left-color: transparent;
+      border-top-color: rgba(100,240,255,.8);
+      animation: spinReverse 5s linear infinite;
+    }
+
+    .ring.three {
+      inset: 20%;
+      border-bottom-color: transparent;
+      animation: spin 3.5s linear infinite;
+    }
+
+    .ring.four {
+      inset: 30%;
+      border-color: rgba(80,230,255,.22);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .coreGlow {
+      width: 38%;
+      height: 38%;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 45% 40%,
+          #efffff 0%,
+          #70edff 12%,
+          #00cfff 32%,
+          rgba(0,130,255,.45) 60%,
+          transparent 72%);
+      box-shadow:
+        0 0 25px #00d9ff,
+        0 0 60px rgba(0,200,255,.8),
+        0 0 110px rgba(0,120,255,.45);
+      animation: corePulse 1.8s ease-in-out infinite;
+    }
+
+    .hudLine {
+      position: absolute;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0,220,255,.7),
+        transparent
+      );
+      width: 70%;
+      opacity: .4;
+    }
+
+    .hudLine.topLine {
+      top: 8%;
+    }
+
+    .hudLine.bottomLine {
+      bottom: 8%;
+    }
+
+    .hudText {
+      position: absolute;
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: rgba(130,235,255,.65);
+    }
+
+    .hudText.left {
+      left: 3%;
+      top: 50%;
+    }
+
+    .hudText.right {
+      right: 3%;
+      top: 50%;
+    }
+
+    /* ===== CHAT ===== */
+
+    .chat {
+      flex-shrink: 1;
+      height: 25vh;
+      min-height: 130px;
+      max-height: 270px;
+      overflow-y: auto;
+      padding: 8px 4px;
+      mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        black 12%,
+        black 100%
+      );
+    }
+
+    .message {
+      margin: 8px 0;
+      padding: 10px 13px;
+      border-radius: 12px;
+      max-width: 90%;
+      line-height: 1.4;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    .message.lucen {
+      margin-right: auto;
+      border-left: 2px solid #00dcff;
+      background: rgba(0,120,180,.08);
+      box-shadow: -8px 0 25px rgba(0,200,255,.04);
+    }
+
+    .message.user {
+      margin-left: auto;
+      border-right: 2px solid #71efff;
+      background: rgba(255,255,255,.045);
+      text-align: right;
+    }
+
+    .message.error {
+      border-color: #ff4d70;
+      color: #ff9daf;
+      background: rgba(255,40,80,.06);
+    }
+
+    .message small {
+      display: block;
+      margin-bottom: 4px;
+      opacity: .5;
+      font-size: 8px;
+      letter-spacing: 2px;
+    }
+
+    /* ===== INPUT ===== */
+
+    .controls {
+      flex-shrink: 0;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .inputWrap {
+      flex: 1;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(0,220,255,.28);
+      border-radius: 14px;
+      background: rgba(0,20,30,.65);
+      backdrop-filter: blur(16px);
+      box-shadow: inset 0 0 20px rgba(0,180,255,.035);
+    }
+
+    #input {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: white;
+      padding: 0 14px;
+      font-size: 15px;
+    }
+
+    #input::placeholder {
+      color: rgba(210,245,255,.35);
+    }
+
+    button {
+      border: 0;
+      color: #dffcff;
+      cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .iconBtn {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      border-radius: 14px;
+      background: rgba(0,30,45,.75);
+      border: 1px solid rgba(0,220,255,.35);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      box-shadow: 0 0 18px rgba(0,200,255,.08);
+    }
+
+    .iconBtn:active {
+      transform: scale(.95);
+    }
+
+    .mic.active {
+      background: rgba(0,180,255,.25);
+      box-shadow:
+        0 0 18px rgba(0,220,255,.5),
+        inset 0 0 15px rgba(0,220,255,.2);
+    }
+
+    /* ===== VOICE PANEL ===== */
+
+    .voicePanel {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: calc(env(safe-area-inset-bottom) + 82px);
+      z-index: 10;
+      padding: 14px;
+      border: 1px solid rgba(0,220,255,.35);
+      border-radius: 16px;
+      background: rgba(2,12,20,.94);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 35px rgba(0,180,255,.15);
+      display: none;
+    }
+
+    .voicePanel.show {
+      display: block;
+    }
+
+    .voiceTitle {
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: #67eaff;
+      margin-bottom: 10px;
+    }
+
+    #voiceSelect {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,220,255,.3);
+      background: #06131c;
+      color: white;
+      outline: none;
+    }
+
+    .voiceRow {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .voiceSmall {
+      flex: 1;
+      height: 40px;
+      border-radius: 9px;
+      background: rgba(0,100,140,.15);
+      border: 1px solid rgba(0,220,255,.25);
+      color: #dffcff;
+      letter-spacing: 1px;
+      font-size: 10px;
+    }
+
+    /* ===== BOOT ===== */
+
+    .boot {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #02060a;
+      transition: opacity .7s ease;
+    }
+
+    .boot.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .bootBox {
+      width: 80%;
+      max-width: 340px;
+    }
+
+    .bootTitle {
+      font-size: 32px;
+      letter-spacing: 8px;
+      text-align: center;
+      margin-bottom: 25px;
+      text-shadow: 0 0 25px #00d9ff;
+    }
+
+    .bootLine {
+      height: 2px;
+      background: #00d9ff;
+      width: 0;
+      box-shadow: 0 0 12px #00d9ff;
+      animation: bootLoad 1.7s ease forwards;
+    }
+
+    .bootText {
+      margin-top: 12px;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: #64eaff;
+      text-align: center;
+    }
+
+    /* ===== ANIMATIONS ===== */
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spinReverse {
+      to { transform: rotate(-360deg); }
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: .7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.04); }
+    }
+
+    @keyframes corePulse {
+      0%,100% {
+        transform: scale(.9);
+        opacity: .8;
+      }
+      50% {
+        transform: scale(1.08);
+        opacity: 1;
+      }
+    }
+
+    @keyframes bootLoad {
+      to { width: 100%; }
+    }
+
+    /* ===== STATE EFFECTS ===== */
+
+    body.listening .coreGlow {
+      box-shadow:
+        0 0 30px #00ffff,
+        0 0 80px rgba(0,255,255,.9),
+        0 0 140px rgba(0,200,255,.5);
+      animation: corePulse .8s infinite;
+    }
+
+    body.thinking .coreGlow {
+      animation: corePulse .35s infinite;
+    }
+
+    body.speaking .coreGlow {
+      animation: corePulse .55s infinite;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="background">
+    <div class="grid"></div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <div class="boot" id="boot">
+    <div class="bootBox">
+      <div class="bootTitle">LUCEN</div>
+      <div class="bootLine"></div>
+      <div class="bootText">INITIALIZING AI CORE...</div>
+    </div>
+  </div>
+
+  <main class="app">
+
+    <header class="top">
+      <div class="brand">
+        <div class="brandMark"></div>
+        <div class="brandText">LUCEN</div>
+      </div>
+
+      <div class="status">
+        <span class="statusDot"></span>
+        <span id="status">ONLINE</span>
+      </div>
+    </header>
+
+    <section class="coreArea">
+
+      <div class="core">
+
+        <div class="ring one"></div>
+        <div class="ring two"></div>
+        <div class="ring three"></div>
+        <div class="ring four"></div>
+
+        <div class="hudLine topLine"></div>
+        <div class="hudLine bottomLine"></div>
+
+        <div class="hudText left">AI CORE</div>
+        <div class="hudText right">ACTIVE</div>
+
+        <div class="coreGlow"></div>
+
+      </div>
+
+    </section>
+
+    <section class="chat" id="chat"></section>
+
+    <div class="controls">
+
+      <div class="inputWrap">
+        <input
+          id="input"
+          type="text"
+          autocomplete="off"
+          placeholder="Mit LUCEN sprechen..."
+        >
+      </div>
+
+      <button class="iconBtn" id="voiceBtn" title="Stimme">
+        ⚙️
+      </button>
+
+      <button class="iconBtn mic" id="micBtn" title="Mikrofon">
+        🎙️
+      </button>
+
+      <button class="iconBtn" id="sendBtn" title="Senden">
+        ➤
+      </button>
+
+    </div>
+
+  </main>
+
+  <!-- VOICE PANEL -->
+
+  <div class="voicePanel" id="voicePanel">
+
+    <div class="voiceTitle">
+      LUCEN VOICE SYSTEM
+    </div>
+
+    <select id="voiceSelect"></select>
+
+    <div class="voiceRow">
+      <button class="voiceSmall" id="testVoice">
+        TESTEN
+      </button>
+
+      <button class="voiceSmall" id="closeVoice">
+        SCHLIESSEN
+      </button>
+    </div>
+
+  </div>
+
+<script>
+/* =========================================================
+   LUCEN — ENDLEVEL MOBILE AI ASSISTANT
+   ========================================================= */
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+const micBtn = document.getElementById("micBtn");
+const voiceBtn = document.getElementById("voiceBtn");
+
+const voicePanel = document.getElementById("voicePanel");
+const voiceSelect = document.getElementById("voiceSelect");
+const testVoice = document.getElementById("testVoice");
+const closeVoice = document.getElementById("closeVoice");
+
+const status = document.getElementById("status");
+const boot = document.getElementById("boot");
+
+let recognition = null;
+let listening = false;
+let thinking = false;
+let speaking = false;
+let autoListen = false;
+let selectedVoice = null;
+
+const API_URL = "/.netlify/functions/chat";
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+function setState(state) {
+
+  document.body.classList.remove(
+    "listening",
+    "thinking",
+    "speaking"
+  );
+
+  if (state === "listening") {
+    document.body.classList.add("listening");
+    status.textContent = "LISTENING";
+  }
+
+  else if (state === "thinking") {
+    document.body.classList.add("thinking");
+    status.textContent = "THINKING";
+  }
+
+  else if (state === "speaking") {
+    document.body.classList.add("speaking");
+    status.textContent = "SPEAKING";
+  }
+
+  else if (state === "error") {
+    status.textContent = "ERROR";
+  }
+
+  else {
+    status.textContent = "ONLINE";
+  }
+}
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+function addMessage(text, type = "lucen") {
+
+  const div = document.createElement("div");
+
+  div.className = "message " + type;
+
+  const label = document.createElement("small");
+
+  label.textContent =
+    type === "user" ? "YOU" :
+    type === "error" ? "SYSTEM ERROR" :
+    "LUCEN";
+
+  const content = document.createElement("div");
+
+  content.textContent = text;
+
+  div.appendChild(label);
+  div.appendChild(content);
+
+  chat.appendChild(div);
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* =========================================================
+   VOICE SYSTEM
+   ========================================================= */
+
+function loadVoices() {
+
+  if (!("speechSynthesis" in window)) {
+    voiceSelect.innerHTML =
+      "<option>Keine Sprachfunktion verfügbar</option>";
+    return;
+  }
+
+  const voices = speechSynthesis.getVoices();
+
+  voiceSelect.innerHTML = "";
+
+  const germanVoices = voices.filter(v =>
+    v.lang &&
+    v.lang.toLowerCase().startsWith("de")
+  );
+
+  const usable =
+    germanVoices.length > 0
+      ? germanVoices
+      : voices;
+
+  usable.forEach((voice, index) => {
+
+    const option = document.createElement("option");
+
+    option.value = index;
+
+    option.textContent =
+      `${voice.name} — ${voice.lang}`;
+
+    voiceSelect.appendChild(option);
+  });
+
+  /* Try to prefer a deeper / more assistant-like voice */
+
+  const preferred = usable.findIndex(v => {
+
+    const name = v.name.toLowerCase();
+
+    return (
+      name.includes("markus") ||
+      name.includes("male") ||
+      name.includes("thomas") ||
+      name.includes("daniel") ||
+      name.includes("alex") ||
+      name.includes("martin")
+    );
+  });
+
+  const index = preferred >= 0 ? preferred : 0;
+
+  if (usable[index]) {
+    selectedVoice = usable[index];
+    voiceSelect.value = index;
+  }
+}
+
+if ("speechSynthesis" in window) {
+
+  loadVoices();
+
+  speechSynthesis.onvoiceschanged = () => {
+    loadVoices();
+  };
+}
+
+voiceSelect.addEventListener("change", () => {
+
+  const voices = speechSynthesis.getVoices();
+
+  const german =
+    voices.filter(v =>
+      v.lang &&
+      v.lang.toLowerCase().startsWith("de")
+    );
+
+  const usable =
+    german.length > 0 ? german : voices;
+
+  selectedVoice =
+    usable[Number(voiceSelect.value)] || null;
+});
+
+/* =========================================================
+   SPEAK
+   ========================================================= */
+
+function speak(text) {
+
+  return new Promise(resolve => {
+
+    if (!("speechSynthesis" in window)) {
+      resolve();
+      return;
+    }
+
+    speechSynthesis.cancel();
+
+    const utterance =
+      new SpeechSynthesisUtterance(text);
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    utterance.lang =
+      selectedVoice?.lang || "de-DE";
+
+    /*
+      JARVIS-LIKE DELIVERY:
+      slightly slower + lower pitch
+    */
+
+    utterance.rate = 0.88;
+    utterance.pitch = 0.78;
+    utterance.volume = 1;
+
+    utterance.onstart = () => {
+      speaking = true;
+      setState("speaking");
+    };
+
+    utterance.onend = () => {
+      speaking = false;
+      setState("online");
+
+      resolve();
+
+      /*
+        AUTOMATIC LISTENING
+      */
+
+      if (autoListen) {
+
+        setTimeout(() => {
+
+          if (!thinking && !speaking) {
+            startListening();
+          }
+
+        }, 350);
+      }
+    };
+
+    utterance.onerror = () => {
+      speaking = false;
+      setState("online");
+      resolve();
+    };
+
+    speechSynthesis.speak(utterance);
+  });
+}
+
+/* =========================================================
+   TEST VOICE
+   ========================================================= */
+
+testVoice.addEventListener("click", () => {
+
+  speak(
+    "Guten Abend. Ich bin LUCEN. Deine Systeme sind online."
+  );
+});
+
+/* =========================================================
+   VOICE PANEL
+   ========================================================= */
+
+voiceBtn.addEventListener("click", () => {
+
+  voicePanel.classList.toggle("show");
+
+  if (voicePanel.classList.contains("show")) {
+    loadVoices();
+  }
+});
+
+closeVoice.addEventListener("click", () => {
+  voicePanel.classList.remove("show");
+});
+
+/* =========================================================
+   SEND TO OPENAI
+   ========================================================= */
+
+async function sendMessage(message) {
+
+  message = message.trim();
+
+  if (!message || thinking) {
+    return;
+  }
+
+  addMessage(message, "user");
+
+  input.value = "";
+
+  thinking = true;
+  setState("thinking");
+
+  try {
+
+    const response = await fetch(API_URL, {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        message
+      })
+
+    });
+
+    const raw = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = {
+        error: raw
+      };
+    }
+
+    if (!response.ok) {
+
+      throw new Error(
+        data?.error ||
+        `Serverfehler ${response.status}`
+      );
+    }
+
+    if (!data.reply) {
+      throw new Error(
+        "LUCEN hat keine Antwort erhalten."
+      );
+    }
+
+    addMessage(data.reply, "lucen");
+
+    thinking = false;
+
+    await speak(data.reply);
+
+  }
+
+  catch (error) {
+
+    thinking = false;
+
+    setState("error");
+
+    addMessage(
+      error?.message ||
+      "Unbekannter Fehler.",
+      "error"
+    );
+
+    setTimeout(() => {
+      setState("online");
+    }, 1800);
+  }
+}
+
+/* =========================================================
+   SEND BUTTON
+   ========================================================= */
+
+sendBtn.addEventListener("click", () => {
+
+  sendMessage(input.value);
+
+});
+
+/* =========================================================
+   ENTER
+   ========================================================= */
+
+input.addEventListener("keydown", event => {
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+    sendMessage(input.value);
+  }
+
+});
+
+/* =========================================================
+   SPEECH RECOGNITION
+   ========================================================= */
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+
+  recognition = new SpeechRecognition();
+
+  recognition.lang = "de-DE";
+
+  recognition.continuous = false;
+
+  recognition.interimResults = false;
+
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+
+    listening = true;
+
+    micBtn.classList.add("active");
+
+    setState("listening");
+  };
+
+  recognition.onresult = event => {
+
+    const transcript =
+      event.results[0][0].transcript.trim();
+
+    if (!transcript) {
+      return;
+    }
+
+    input.value = transcript;
+
+    sendMessage(transcript);
+  };
+
+  recognition.onerror = event => {
+
+    listening = false;
+
+    micBtn.classList.remove("active");
+
+    /*
+      Ignore normal iPhone speech interruptions
+    */
+
+    if (
+      event.error !== "no-speech" &&
+      event.error !== "aborted"
+    ) {
+
+      addMessage(
+        "Mikrofonfehler: " + event.error,
+        "error"
+      );
+    }
+
+    if (!thinking && !speaking) {
+      setState("online");
+    }
+  };
+
+  recognition.onend = () => {
+
+    listening = false;
+
+    micBtn.classList.remove("active");
+
+    if (!thinking && !speaking) {
+      setState("online");
+    }
+  };
+
+}
+
+/* =========================================================
+   START LISTENING
+   ========================================================= */
+
+function startListening() {
+
+  if (!recognition) {
+
+    addMessage(
+      "Spracherkennung wird auf diesem Gerät nicht unterstützt.",
+      "error"
+    );
+
+    return;
+  }
+
+  if (
+    listening ||
+    thinking ||
+    speaking
+  ) {
+    return;
+  }
+
+  try {
+
+    recognition.start();
+
+  } catch (error) {
+
+    /*
+      Safari sometimes throws if start is called
+      while recognition is still shutting down.
+    */
+
+    setTimeout(() => {
+
+      try {
+
+        if (
+          !listening &&
+          !thinking &&
+          !speaking
+        ) {
+          recognition.start();
+        }
+
+      } catch {}
+
+    }, 500);
+  }
+}
+
+/* =========================================================
+   MICROPHONE BUTTON
+   ========================================================= */
+
+micBtn.addEventListener("click", () => {
+
+  if (!recognition) {
+    return;
+  }
+
+  /*
+    First tap enables permanent voice mode.
+  */
+
+  if (!autoListen) {
+
+    autoListen = true;
+
+    addMessage(
+      "Sprachmodus aktiviert. Du kannst jetzt einfach sprechen.",
+      "lucen"
+    );
+
+    startListening();
+
+    return;
+  }
+
+  /*
+    Manual stop
+  */
+
+  if (listening) {
+
+    autoListen = false;
+
+    try {
+      recognition.stop();
+    } catch {}
+
+    return;
+  }
+
+  startListening();
+});
+
+/* =========================================================
+   BOOT
+   ========================================================= */
+
+window.addEventListener("load", () => {
+
+  setTimeout(() => {
+
+    boot.classList.add("hide");
+
+    setTimeout(() => {
+
+      addMessage(
+        "System online. Ich bin LUCEN. Sprachmodus bereit.",
+        "lucen"
+      );
+
+    }, 500);
+
+  }, 1800);
+
+});
+
+/* =========================================================
+   PAGE VISIBILITY
+   ========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if (document.hidden) {
+
+      try {
+        speechSynthesis.cancel();
+      } catch {}
+
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
