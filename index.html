@@ -92,10 +92,12 @@ header {
   border-radius: 14px;
   background: rgba(20,35,55,.75);
   border: 1px solid rgba(80,190,255,.2);
+  white-space: pre-wrap;
 }
 
 .user {
   text-align: right;
+  background: rgba(8,125,169,.25);
 }
 
 .input-area {
@@ -138,7 +140,7 @@ button:active {
 
 <header>
   <div class="logo">LUCEN</div>
-  <div class="status">SYSTEM ONLINE</div>
+  <div class="status" id="status">SYSTEM ONLINE</div>
 </header>
 
 <div class="core">
@@ -147,12 +149,12 @@ button:active {
 
 <div class="chat" id="chat">
   <div class="message">
-    LUCEN online. Wie kann ich dir helfen?
+    LUCEN online. Ich bin bereit.
   </div>
 </div>
 
 <div class="input-area">
-  <input id="input" placeholder="Sprich mit LUCEN..." />
+  <input id="input" placeholder="Sprich mit LUCEN..." autocomplete="off">
   <button onclick="sendMessage()">➤</button>
   <button onclick="voice()">🎙️</button>
 </div>
@@ -162,8 +164,9 @@ button:active {
 <script>
 const input = document.getElementById("input");
 const chat = document.getElementById("chat");
+const statusText = document.getElementById("status");
 
-function addMessage(text, type) {
+function addMessage(text, type = "") {
   const div = document.createElement("div");
   div.className = "message " + type;
   div.textContent = text;
@@ -171,7 +174,7 @@ function addMessage(text, type) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-function sendMessage() {
+async function sendMessage() {
   const text = input.value.trim();
 
   if (!text) return;
@@ -179,30 +182,75 @@ function sendMessage() {
   addMessage(text, "user");
   input.value = "";
 
-  setTimeout(() => {
-    addMessage("Verstanden. Ich bin LUCEN. Meine KI-Verbindung wird als Nächstes eingerichtet.", "");
-  }, 500);
+  statusText.textContent = "LUCEN DENKT...";
+
+  try {
+    const response = await fetch("/.netlify/functions/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: text
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Fehler");
+    }
+
+    addMessage(data.reply);
+
+  } catch (error) {
+    addMessage("Verbindung zu meinem KI-System fehlgeschlagen.");
+    console.error(error);
+  }
+
+  statusText.textContent = "SYSTEM ONLINE";
 }
 
-input.addEventListener("keydown", function(e) {
-  if (e.key === "Enter") {
+input.addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
     sendMessage();
   }
 });
 
 function voice() {
-  if (!("webkitSpeechRecognition" in window)) {
-    addMessage("Spracherkennung wird auf diesem Gerät/Browser nicht unterstützt.", "");
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    addMessage("Spracherkennung wird auf diesem Gerät nicht unterstützt.");
     return;
   }
 
-  const recognition = new webkitSpeechRecognition();
+  const recognition = new SpeechRecognition();
+
   recognition.lang = "de-DE";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  statusText.textContent = "ICH HÖRE...";
+
   recognition.start();
 
   recognition.onresult = function(event) {
     input.value = event.results[0][0].transcript;
     sendMessage();
+  };
+
+  recognition.onerror = function() {
+    statusText.textContent = "SYSTEM ONLINE";
+    addMessage("Ich konnte dich leider nicht verstehen.");
+  };
+
+  recognition.onend = function() {
+    if (statusText.textContent === "ICH HÖRE...") {
+      statusText.textContent = "SYSTEM ONLINE";
+    }
   };
 }
 </script>
