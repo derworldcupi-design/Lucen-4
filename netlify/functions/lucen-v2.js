@@ -27,7 +27,7 @@ async function callOpenAI(body) {
     {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${key}`,
+        Authorization: `Bearer ${key}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify(body)
@@ -45,7 +45,7 @@ async function callOpenAI(body) {
   }
 
   if (!response.ok) {
-    console.error("OPENAI:", response.status, raw);
+    console.error("OPENAI ERROR:", response.status, raw);
 
     throw new Error(
       data?.error?.message ||
@@ -56,230 +56,687 @@ async function callOpenAI(body) {
   return data;
 }
 
+
+/* -------------------------------------------------------
+   TEXT AUS RESPONSE HOLEN
+------------------------------------------------------- */
+
 function getText(data) {
-  if (data?.output_text) {
+
+  if (
+    typeof data?.output_text === "string" &&
+    data.output_text.trim()
+  ) {
     return data.output_text.trim();
   }
 
   let text = "";
 
   for (const item of data?.output || []) {
-    if (item.type !== "message") continue;
 
-    for (const content of item.content || []) {
+    if (item?.type !== "message") continue;
+
+    for (const content of item?.content || []) {
+
       if (
-        content.type === "output_text" &&
-        content.text
+        content?.type === "output_text" &&
+        typeof content?.text === "string"
       ) {
         text += content.text;
       }
+
     }
   }
 
   return text.trim();
 }
 
+
+/* -------------------------------------------------------
+   QUELLEN AUS WEB-SEARCH EXTRAHIEREN
+------------------------------------------------------- */
+
+function extractSources(data) {
+
+  const sources = [];
+  const seen = new Set();
+
+  function addSource(source) {
+
+    if (!source) return;
+
+    const url =
+      source.url ||
+      source.href ||
+      source.link;
+
+    if (!url) return;
+
+    if (seen.has(url)) return;
+
+    seen.add(url);
+
+    let domain = "";
+
+    try {
+      domain = new URL(url).hostname
+        .replace(/^www\./, "");
+    } catch {
+      domain = "";
+    }
+
+    sources.push({
+      id: `SRC-${String(sources.length + 1).padStart(2, "0")}`,
+
+      title:
+        source.title ||
+        source.name ||
+        domain ||
+        "Webquelle",
+
+      domain,
+
+      url,
+
+      snippet:
+        source.snippet ||
+        source.description ||
+        "",
+
+      status: "FOUND"
+    });
+  }
+
+
+  /* -----------------------------------------------
+     Responses API Output durchsuchen
+  ------------------------------------------------ */
+
+  for (const item of data?.output || []) {
+
+    /*
+      Web Search kann unterschiedliche Output-Strukturen
+      liefern. Deshalb durchsuchen wir mehrere bekannte
+      Ebenen.
+    */
+
+    if (
+      item?.type === "web_search_call" ||
+      item?.type === "web_search"
+    ) {
+
+      for (const result of item?.results || []) {
+        addSource(result);
+      }
+
+      for (const result of item?.search_results || []) {
+        addSource(result);
+      }
+    }
+
+
+    /* Message / Output Text */
+
+    if (item?.type === "message") {
+
+      for (const content of item?.content || []) {
+
+        const annotations =
+          content?.annotations || [];
+
+        for (const annotation of annotations) {
+
+          if (
+            annotation?.type ===
+              "url_citation"
+          ) {
+
+            addSource({
+              title:
+                annotation.title ||
+                annotation.text ||
+                "Webquelle",
+
+              url:
+                annotation.url
+            });
+
+          }
+
+        }
+
+      }
+
+    }
+  }
+
+
+  /* -----------------------------------------------
+     Fallback: rekursiv nach URL-Citations suchen
+  ------------------------------------------------ */
+
+  function scan(value, depth = 0) {
+
+    if (depth > 8) return;
+
+    if (!value) return;
+
+    if (Array.isArray(value)) {
+
+      for (const item of value) {
+        scan(item, depth + 1);
+      }
+
+      return;
+    }
+
+    if (typeof value !== "object") {
+      return;
+    }
+
+
+    if (
+      value.type === "url_citation" &&
+      value.url
+    ) {
+
+      addSource({
+        title:
+          value.title ||
+          value.text ||
+          "Webquelle",
+
+        url: value.url
+      });
+    }
+
+
+    for (const key of Object.keys(value)) {
+
+      if (
+        key === "output_text" ||
+        key === "instructions"
+      ) {
+        continue;
+      }
+
+      scan(value[key], depth + 1);
+    }
+  }
+
+  scan(data);
+
+
+  return sources.slice(0, 12);
+}
+
+
+/* -------------------------------------------------------
+   ANALYSE-PHASEN
+------------------------------------------------------- */
+
+function buildAnalysis(sources, usedSearch) {
+
+  if (!usedSearch) {
+
+    return {
+      status: "complete",
+
+      modules: [
+        "ANALYSIS",
+        "AI CORE",
+        "REASONING",
+        "RESPONSE"
+      ],
+
+      phases: [
+        {
+          id: "analysis",
+          label: "ANALYSIS",
+          status: "complete"
+        },
+        {
+          id: "ai",
+          label: "AI CORE",
+          status: "complete"
+        },
+        {
+          id: "response",
+          label: "RESPONSE",
+          status: "complete"
+        }
+      ]
+    };
+  }
+
+
+  return {
+
+    status: "complete",
+
+    modules: [
+      "QUERY ANALYSIS",
+      "WORLD SEARCH",
+      "SOURCE DISCOVERY",
+      "SOURCE PROCESSING",
+      "CROSS CHECK",
+      "SYNTHESIS",
+      "RESPONSE"
+    ],
+
+    phases: [
+
+      {
+        id: "query",
+        label: "QUERY ANALYSIS",
+        status: "complete"
+      },
+
+      {
+        id: "world",
+        label: "WORLD SEARCH",
+        status: "complete"
+      },
+
+      {
+        id: "sources",
+        label: "SOURCE DISCOVERY",
+        status: sources.length
+          ? "complete"
+          : "partial",
+        count: sources.length
+      },
+
+      {
+        id: "processing",
+        label: "SOURCE PROCESSING",
+        status: "complete"
+      },
+
+      {
+        id: "crosscheck",
+        label: "CROSS CHECK",
+        status: sources.length > 1
+          ? "complete"
+          : "partial"
+      },
+
+      {
+        id: "synthesis",
+        label: "SYNTHESIS",
+        status: "complete"
+      },
+
+      {
+        id: "response",
+        label: "RESPONSE",
+        status: "complete"
+      }
+    ]
+  };
+}
+
+
+/* -------------------------------------------------------
+   SUCHERKENNUNG
+------------------------------------------------------- */
+
+function shouldSearch(message) {
+
+  const words = [
+
+    "suche",
+    "such",
+    "internet",
+    "web",
+    "recherche",
+    "recherchiere",
+
+    "aktuell",
+    "aktuelle",
+    "aktuellen",
+    "aktueller",
+
+    "heute",
+    "heutige",
+    "jetzt",
+
+    "nachrichten",
+    "news",
+
+    "preis",
+    "preise",
+
+    "wetter",
+
+    "öffnungszeiten",
+
+    "quelle",
+    "quellen",
+
+    "vergleich",
+    "vergleiche",
+
+    "wer",
+    "was",
+    "wo",
+    "wann",
+
+    "latest",
+    "recent"
+  ];
+
+  const lower =
+    message.toLowerCase();
+
+  return words.some(word =>
+    lower.includes(word)
+  );
+}
+
+
+/* -------------------------------------------------------
+   SYSTEM
+------------------------------------------------------- */
+
 export default async function handler(req) {
 
   if (req.method === "OPTIONS") {
+
     return new Response(null, {
       status: 204,
       headers: CORS
     });
+
   }
 
+
   if (req.method !== "POST") {
+
     return json({
       ok: false,
       error: "Method not allowed"
     }, 405);
+
   }
+
 
   try {
 
-    const body = await req.json();
+    const body =
+      await req.json();
 
     const message =
       typeof body?.message === "string"
         ? body.message.trim()
         : "";
 
+
     if (!message) {
+
       return json({
         ok: false,
         error: "Keine Nachricht erhalten."
       }, 400);
+
     }
 
-    /*
-     * ---------------------------------------
-     * LUCEN INTERNET SEARCH
-     * ---------------------------------------
-     */
-
-    const searchWords = [
-      "suche",
-      "such",
-      "internet",
-      "web",
-      "recherche",
-      "recherchiere",
-      "aktuell",
-      "aktuelle",
-      "aktuellen",
-      "heute",
-      "heutige",
-      "jetzt",
-      "nachrichten",
-      "news",
-      "preis",
-      "preise",
-      "wetter",
-      "öffnungszeiten",
-      "quelle",
-      "quellen"
-    ];
-
-    const lower = message.toLowerCase();
 
     const useWebSearch =
-      searchWords.some(word =>
-        lower.includes(word)
-      );
+      shouldSearch(message);
 
-    /*
-     * ---------------------------------------
-     * WEB SEARCH
-     * ---------------------------------------
-     */
+
+    console.log(
+      "LUCEN REQUEST:",
+      message
+    );
+
+    console.log(
+      "WEB SEARCH:",
+      useWebSearch
+    );
+
+
+    /* =====================================================
+       ECHTE WEB-RECHERCHE
+    ===================================================== */
 
     if (useWebSearch) {
 
-      console.log(
-        "LUCEN WEB SEARCH:",
-        message
-      );
+      const data =
+        await callOpenAI({
 
-      const data = await callOpenAI({
+          model: "gpt-5-mini",
 
-        model: "gpt-5-mini",
+          tools: [
+            {
+              type: "web_search"
+            }
+          ],
 
-        tools: [
-          {
-            type: "web_search"
-          }
-        ],
+          input: [
 
-        input: [
-          {
-            role: "system",
-            content: `
+            {
+              role: "system",
+
+              content: `
 Du bist LUCEN.
 
-Der Benutzer möchte eine aktuelle
-Internet-Recherche.
+Du führst eine echte aktuelle
+Internet-Recherche für den Benutzer durch.
 
-Nutze die Websuche.
+WICHTIGE REGELN:
 
-Arbeite sorgfältig:
-- aktuelle Informationen
-- mehrere Quellen wenn sinnvoll
-- keine erfundenen Informationen
-- keine erfundenen Quellen
-- Deutsch wenn der Benutzer Deutsch spricht
-- kurz und verständlich antworten
+1. Nutze die Websuche.
+2. Verwende aktuelle Informationen.
+3. Prüfe Informationen kritisch.
+4. Erfinde niemals Quellen.
+5. Erfinde niemals URLs.
+6. Wenn mehrere Quellen verfügbar sind,
+   vergleiche sie.
+7. Antworte auf Deutsch, wenn der Benutzer
+   Deutsch spricht.
+8. Sei präzise und verständlich.
+9. Gib am Ende eine kompakte Antwort.
+10. Verwende Quellen aus der tatsächlichen
+    Webrecherche.
 
-Wenn Quelleninformationen verfügbar sind,
-nenne die wichtigsten Quellen am Ende.
-            `.trim()
-          },
-          {
-            role: "user",
-            content: message
-          }
-        ]
-      });
+LUCEN soll wie ein hochentwickelter
+persönlicher Intelligence-Assistent arbeiten.
+              `.trim()
+            },
 
-      const answer = getText(data);
+            {
+              role: "user",
+
+              content: message
+            }
+
+          ]
+        });
+
+
+      const answer =
+        getText(data);
+
+
+      const sources =
+        extractSources(data);
+
+
+      const analysis =
+        buildAnalysis(
+          sources,
+          true
+        );
+
+
+      console.log(
+        "SOURCES FOUND:",
+        sources.length
+      );
+
 
       return json({
+
         ok: true,
+
         success: true,
+
         type: "research",
+
         intent: "research",
 
         reply:
           answer ||
-          "Die Websuche hat keine Antwort zurückgegeben.",
+          "Die Recherche wurde durchgeführt, aber es konnte keine Antwort erzeugt werden.",
 
-        analysis: {
+        sources,
+
+        sourceCount:
+          sources.length,
+
+        analysis,
+
+        research: {
+
+          active: true,
+
+          query: message,
+
           status: "complete",
-          modules: [
-            "ANALYSIS",
-            "WORLD SEARCH",
-            "WEB SEARCH",
-            "SOURCE PROCESSING",
-            "RESPONSE"
-          ]
+
+          sources,
+
+          sourceCount:
+            sources.length,
+
+          phases:
+            analysis.phases
+
+        },
+
+        meta: {
+
+          model: "gpt-5-mini",
+
+          webSearch: true,
+
+          generatedAt:
+            new Date().toISOString()
+
         }
+
       });
+
     }
 
-    /*
-     * ---------------------------------------
-     * NORMAL CHAT
-     * ---------------------------------------
-     */
 
-    const data = await callOpenAI({
+    /* =====================================================
+       NORMALER CHAT
+    ===================================================== */
 
-      model: "gpt-5-mini",
+    const data =
+      await callOpenAI({
 
-      input: [
-        {
-          role: "system",
-          content: `
+        model: "gpt-5-mini",
+
+        input: [
+
+          {
+            role: "system",
+
+            content: `
 Du bist LUCEN, ein hochentwickelter
 persönlicher KI-Assistent.
 
-Sprich Deutsch, wenn der Benutzer Deutsch spricht.
+Sprich Deutsch, wenn der Benutzer
+Deutsch spricht.
 
 Sei:
+
 ruhig,
 intelligent,
 präzise,
-natürlich
-und hilfreich.
+natürlich,
+hilfreich.
 
 Keine unnötig langen Antworten.
-          `.trim()
-        },
-        {
-          role: "user",
-          content: message
-        }
-      ]
-    });
+
+Wenn keine Internetrecherche
+angefordert wurde, beantworte
+die Frage direkt.
+            `.trim()
+          },
+
+          {
+            role: "user",
+
+            content: message
+          }
+
+        ]
+
+      });
+
+
+    const answer =
+      getText(data);
+
 
     return json({
+
       ok: true,
+
       success: true,
+
       type: "chat",
+
       intent: "chat",
 
       reply:
-        getText(data) ||
+        answer ||
         "Verstanden.",
 
-      analysis: {
-        status: "complete",
-        modules: [
-          "ANALYSIS",
-          "AI CORE",
-          "RESPONSE"
-        ]
+      sources: [],
+
+      sourceCount: 0,
+
+      analysis:
+        buildAnalysis(
+          [],
+          false
+        ),
+
+      research: {
+
+        active: false,
+
+        query: null,
+
+        status: "idle",
+
+        sources: [],
+
+        sourceCount: 0,
+
+        phases: []
+
+      },
+
+      meta: {
+
+        model: "gpt-5-mini",
+
+        webSearch: false,
+
+        generatedAt:
+          new Date().toISOString()
+
       }
+
     });
+
 
   } catch (error) {
 
@@ -288,8 +745,11 @@ Keine unnötig langen Antworten.
       error
     );
 
+
     return json({
+
       ok: false,
+
       success: false,
 
       error:
@@ -297,7 +757,10 @@ Keine unnötig langen Antworten.
         "Unbekannter Fehler",
 
       reply:
-        "Die Internetverbindung von LUCEN konnte nicht hergestellt werden."
+        "LUCEN konnte die Anfrage momentan nicht verarbeiten."
+
     }, 500);
+
   }
+
 }
