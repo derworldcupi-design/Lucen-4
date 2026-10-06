@@ -1,535 +1,401 @@
-const BASE_URL =
-  "https://zingy-alpaca-672918.netlify.app/.netlify/functions";
+// LUCEN v2 — MASTER TEXT + INTERNET CORE
+// Voice / realtime.js bleibt unangetastet.
 
-export default async (req) => {
-
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Cache-Control": "no-store"
-  };
-
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers
-    });
-  }
-
-  if (req.method !== "POST") {
-    return response(
-      {
-        ok: false,
-        error: "Method not allowed"
-      },
-      405,
-      headers
-    );
-  }
-
-  try {
-
-    const body = await req.json();
-
-    const message =
-      String(
-        body?.message || ""
-      ).trim();
-
-    const context =
-      body?.context || {};
-
-    if (!message) {
-      return response(
-        {
-          ok: false,
-          error: "Keine Nachricht."
-        },
-        400,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 1. CORE → INTENT ERKENNEN
-    // =====================================================
-
-    const core =
-      await callFunction(
-        "/core-v2",
-        {
-          message,
-          context
-        }
-      );
-
-    if (!core.ok) {
-      return response(
-        {
-          ok: false,
-          stage: "core",
-          error:
-            core.error ||
-            "Core konnte Anfrage nicht verarbeiten."
-        },
-        500,
-        headers
-      );
-    }
-
-    const intent =
-      core.intent || "chat";
-
-    const action =
-      core.action || null;
-
-    const payload =
-      core.payload || {};
-
-    // =====================================================
-    // 2. CHAT
-    // =====================================================
-
-    if (
-      intent === "chat" ||
-      !core.requiresAction
-    ) {
-
-      return response(
-        {
-          ok: true,
-          type: "chat",
-          intent,
-          reply:
-            core.reply ||
-            "Verstanden.",
-          core
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 3. MEMORY
-    // =====================================================
-
-    if (intent === "memory") {
-
-      const result =
-        await callFunction(
-          "/memory-v2",
-          {
-            action:
-              action ||
-              "remember",
-            payload
-          }
-        );
-
-      return response(
-        {
-          ok: result.ok !== false,
-          type: "memory",
-          intent,
-          result,
-          reply:
-            core.reply ||
-            "Erledigt."
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 4. TASK
-    // =====================================================
-
-    if (intent === "task") {
-
-      const result =
-        await callFunction(
-          "/tasks-v2",
-          {
-            action:
-              action ||
-              "create",
-            payload
-          }
-        );
-
-      return response(
-        {
-          ok: result.ok !== false,
-          type: "task",
-          intent,
-          result,
-          reply:
-            core.reply ||
-            "Aufgabe verarbeitet."
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 5. RESEARCH
-    // =====================================================
-
-    if (intent === "research") {
-
-      const result =
-        await callFunction(
-          "/research",
-          {
-            query:
-              payload.query ||
-              message,
-            context
-          }
-        );
-
-      return response(
-        {
-          ok: result.ok !== false,
-          type: "research",
-          intent,
-          result,
-          reply:
-            core.reply ||
-            result.answer ||
-            "Recherche abgeschlossen."
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 6. CALCULATION
-    // =====================================================
-
-    if (intent === "calculation") {
-
-      const result =
-        await callFunction(
-          "/actions",
-          {
-            action: "calculate",
-            payload: {
-              expression:
-                payload.expression ||
-                message
-            }
-          }
-        );
-
-      return response(
-        {
-          ok: result.ok !== false,
-          type: "calculation",
-          intent,
-          result,
-          reply:
-            core.reply ||
-            "Berechnung abgeschlossen."
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 7. DOCUMENT
-    // =====================================================
-
-    if (intent === "document") {
-
-      const result =
-        await callFunction(
-          "/actions",
-          {
-            action:
-              action ||
-              "create_text",
-            payload
-          }
-        );
-
-      return response(
-        {
-          ok: result.ok !== false,
-          type: "document",
-          intent,
-          result,
-          reply:
-            core.reply ||
-            "Dokument vorbereitet."
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 8. CALENDAR
-    // =====================================================
-
-    if (intent === "calendar") {
-
-      const result =
-        await callFunction(
-          "/actions",
-          {
-            action:
-              "create_calendar_event",
-            payload
-          }
-        );
-
-      return response(
-        {
-          ok: result.ok !== false,
-          type: "calendar",
-          intent,
-          result,
-          reply:
-            core.reply ||
-            "Kalendereintrag vorbereitet."
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 9. REMINDER
-    // =====================================================
-
-    if (intent === "reminder") {
-
-      const result =
-        await callFunction(
-          "/notifications",
-          {
-            action:
-              action ||
-              "prepare_reminder",
-            payload
-          }
-        );
-
-      return response(
-        {
-          ok: result.ok !== false,
-          type: "reminder",
-          intent,
-          result,
-          reply:
-            core.reply ||
-            "Erinnerung vorbereitet."
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 10. NOTIFICATION
-    // =====================================================
-
-    if (intent === "notification") {
-
-      const result =
-        await callFunction(
-          "/notifications",
-          {
-            action:
-              action ||
-              "prepare_notification",
-            payload
-          }
-        );
-
-      return response(
-        {
-          ok: result.ok !== false,
-          type: "notification",
-          intent,
-          result,
-          reply:
-            core.reply ||
-            "Benachrichtigung vorbereitet."
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 11. NAVIGATION
-    // =====================================================
-
-    if (intent === "navigation") {
-
-      const result =
-        await callFunction(
-          "/actions",
-          {
-            action: "prepare_url",
-            payload
-          }
-        );
-
-      return response(
-        {
-          ok: result.ok !== false,
-          type: "navigation",
-          intent,
-          result,
-          reply:
-            core.reply ||
-            "Navigation vorbereitet."
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // 12. SYSTEM
-    // =====================================================
-
-    if (intent === "system") {
-
-      return response(
-        {
-          ok: true,
-          type: "system",
-          intent,
-          reply:
-            core.reply ||
-            "LUCEN-System bereit.",
-          core
-        },
-        200,
-        headers
-      );
-    }
-
-    // =====================================================
-    // FALLBACK
-    // =====================================================
-
-    return response(
-      {
-        ok: true,
-        type: "chat",
-        intent,
-        reply:
-          core.reply ||
-          "Ich habe die Anfrage verstanden.",
-        core
-      },
-      200,
-      headers
-    );
-
-  } catch (error) {
-
-    console.error(
-      "LUCEN ORCHESTRATOR ERROR:",
-      error
-    );
-
-    return response(
-      {
-        ok: false,
-        error:
-          error?.message ||
-          "LUCEN Gateway Fehler."
-      },
-      500,
-      headers
-    );
-  }
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Cache-Control": "no-store"
 };
 
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      ...CORS,
+      "Content-Type": "application/json; charset=utf-8"
+    }
+  });
+}
 
-// =========================================================
-// INTERNAL FUNCTION CALL
-// =========================================================
+async function openAI(body) {
+  const apiKey = process.env.OPENAI_API_KEY;
 
-async function callFunction(
-  path,
-  body
-) {
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY fehlt in Netlify.");
+  }
 
-  const response =
-    await fetch(
-      `${BASE_URL}${path}`,
-      {
-        method: "POST",
+  const response = await fetch(
+    "https://api.openai.com/v1/responses",
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    }
+  );
 
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
-
-        body:
-          JSON.stringify(body)
-      }
-    );
-
-  const text =
-    await response.text();
+  const text = await response.text();
 
   let data;
 
   try {
-    data =
-      JSON.parse(text);
+    data = JSON.parse(text);
   } catch {
-    data = {
-      ok: false,
-      error: text
-    };
+    data = {};
   }
 
   if (!response.ok) {
-    return {
-      ok: false,
-      status: response.status,
-      ...data
-    };
+    console.error("OPENAI ERROR:", response.status, text);
+
+    throw new Error(
+      data?.error?.message ||
+      `OpenAI Fehler ${response.status}`
+    );
   }
 
   return data;
 }
 
+function getOutputText(data) {
+  if (typeof data?.output_text === "string") {
+    return data.output_text.trim();
+  }
 
-function response(
-  data,
-  status,
-  headers
-) {
+  let result = "";
 
-  return new Response(
-    JSON.stringify(
-      data,
-      null,
-      2
-    ),
-    {
-      status,
-      headers: {
-        ...headers,
-        "Content-Type":
-          "application/json; charset=utf-8"
+  for (const item of data?.output || []) {
+    if (item?.type !== "message") continue;
+
+    for (const content of item?.content || []) {
+      if (
+        content?.type === "output_text" &&
+        typeof content.text === "string"
+      ) {
+        result += content.text;
       }
     }
-  );
+  }
+
+  return result.trim();
+}
+
+function wantsWebSearch(message) {
+  const text = message.toLowerCase();
+
+  const keywords = [
+    "internet",
+    "web",
+    "online",
+    "suche",
+    "such",
+    "recherchiere",
+    "recherche",
+    "aktuell",
+    "aktuelle",
+    "aktuellen",
+    "heute",
+    "heutige",
+    "jetzt",
+    "momentan",
+    "news",
+    "nachrichten",
+    "preis",
+    "preise",
+    "kosten",
+    "öffnungszeiten",
+    "wetter",
+    "google",
+    "quelle",
+    "quellen"
+  ];
+
+  return keywords.some(word => text.includes(word));
+}
+
+async function normalChat(message, context = "") {
+  const data = await openAI({
+    model: "gpt-5-mini",
+
+    input: [
+      {
+        role: "system",
+        content: `
+Du bist LUCEN, ein hochentwickelter persönlicher KI-Assistent.
+
+Sprache:
+Antworte auf Deutsch, wenn der Benutzer Deutsch spricht.
+
+Persönlichkeit:
+ruhig, intelligent, souverän, natürlich,
+präzise und hilfreich.
+
+Sprich nicht unnötig lang.
+Keine Roboterformulierungen.
+Keine erfundenen Fakten.
+
+Du bist der Text-Core von LUCEN.
+        `.trim()
+      },
+      {
+        role: "user",
+        content: context
+          ? `Kontext:\n${context}\n\nBenutzer:\n${message}`
+          : message
+      }
+    ]
+  });
+
+  return getOutputText(data);
+}
+
+async function webSearch(message, context = "") {
+  const data = await openAI({
+    model: "gpt-5-mini",
+
+    tools: [
+      {
+        type: "web_search"
+      }
+    ],
+
+    input: [
+      {
+        role: "system",
+        content: `
+Du bist LUCENs Internet-Rechercheeinheit.
+
+Nutze die Websuche für aktuelle oder externe Informationen.
+
+WICHTIG:
+- Recherchiere tatsächlich im Internet.
+- Erfinde keine Quellen.
+- Wenn Informationen zeitabhängig sind, bevorzuge aktuelle Ergebnisse.
+- Vergleiche Informationen, wenn mehrere Quellen sinnvoll sind.
+- Antworte auf Deutsch, wenn der Benutzer Deutsch spricht.
+- Sei präzise und verständlich.
+- Nenne am Ende die wichtigsten verwendeten Quellen,
+  sofern Quelleninformationen verfügbar sind.
+
+Du kannst Informationen aus dem Internet analysieren
+und anschließend verständlich für den Benutzer zusammenfassen.
+        `.trim()
+      },
+      {
+        role: "user",
+        content: context
+          ? `Kontext:\n${context}\n\nRechercheauftrag:\n${message}`
+          : message
+      }
+    ]
+  });
+
+  return getOutputText(data);
+}
+
+async function calculate(message) {
+  const expression = message
+    .replace(/,/g, ".")
+    .replace(/×/g, "*")
+    .replace(/÷/g, "/")
+    .replace(/−/g, "-")
+    .replace(/[^\d+\-*/().% ]/g, "")
+    .trim();
+
+  if (!expression) {
+    return null;
+  }
+
+  if (!/^[\d+\-*/().% ]+$/.test(expression)) {
+    return null;
+  }
+
+  try {
+    const result = Function(
+      `"use strict"; return (${expression})`
+    )();
+
+    if (!Number.isFinite(result)) {
+      return null;
+    }
+
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+export default async function handler(req) {
+  // CORS
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: CORS
+    });
+  }
+
+  // Nur POST
+  if (req.method !== "POST") {
+    return json(
+      {
+        ok: false,
+        success: false,
+        error: "Method not allowed"
+      },
+      405
+    );
+  }
+
+  try {
+    const body = await req.json();
+
+    const message =
+      typeof body?.message === "string"
+        ? body.message.trim()
+        : "";
+
+    const context =
+      typeof body?.context === "string"
+        ? body.context
+        : "";
+
+    if (!message) {
+      return json(
+        {
+          ok: false,
+          success: false,
+          error: "Keine Nachricht erhalten."
+        },
+        400
+      );
+    }
+
+    console.log("LUCEN REQUEST:", message);
+
+    // -----------------------------------------
+    // CALCULATOR
+    // -----------------------------------------
+
+    const calculation =
+      await calculate(message);
+
+    const looksLikeCalculation =
+      /^[\d\s()+\-*/%.×÷−]+$/.test(message);
+
+    if (
+      calculation !== null &&
+      looksLikeCalculation
+    ) {
+      return json({
+        ok: true,
+        success: true,
+        type: "calculation",
+        intent: "calculation",
+
+        reply:
+          `Das Ergebnis ist ${calculation}.`,
+
+        result: calculation,
+
+        analysis: {
+          status: "complete",
+          modules: [
+            "ANALYSIS",
+            "CALCULATION"
+          ]
+        }
+      });
+    }
+
+    // -----------------------------------------
+    // INTERNET
+    // -----------------------------------------
+
+    if (wantsWebSearch(message)) {
+      console.log("LUCEN MODE: WEB SEARCH");
+
+      const answer =
+        await webSearch(message, context);
+
+      return json({
+        ok: true,
+        success: true,
+
+        type: "research",
+        intent: "research",
+
+        reply:
+          answer ||
+          "Ich konnte keine verwertbare Information aus der Websuche erhalten.",
+
+        query: message,
+
+        analysis: {
+          status: "complete",
+
+          modules: [
+            "ANALYSIS",
+            "WORLD SEARCH",
+            "WEB SEARCH",
+            "SOURCE PROCESSING",
+            "RESPONSE"
+          ]
+        }
+      });
+    }
+
+    // -----------------------------------------
+    // NORMAL CHAT
+    // -----------------------------------------
+
+    console.log("LUCEN MODE: CHAT");
+
+    const answer =
+      await normalChat(message, context);
+
+    return json({
+      ok: true,
+      success: true,
+
+      type: "chat",
+      intent: "chat",
+
+      reply:
+        answer ||
+        "Verstanden.",
+
+      analysis: {
+        status: "complete",
+
+        modules: [
+          "ANALYSIS",
+          "AI CORE",
+          "RESPONSE"
+        ]
+      }
+    });
+
+  } catch (error) {
+    console.error(
+      "LUCEN MASTER ERROR:",
+      error
+    );
+
+    return json(
+      {
+        ok: false,
+        success: false,
+
+        error:
+          error?.message ||
+          "Unbekannter Fehler",
+
+        reply:
+          "LUCEN konnte den KI-Core momentan nicht erreichen."
+      },
+      500
+    );
+  }
 }
