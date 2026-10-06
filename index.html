@@ -3,979 +3,2131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#02060b">
+<meta name="theme-color" content="#02070c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>LUCEN</title>
+
+<title>LUCEN // AI SYSTEM</title>
+
 <style>
 :root{
-  --bg:#02060b;
-  --panel:rgba(4,13,21,.78);
-  --line:rgba(80,220,255,.18);
-  --cyan:#55eaff;
-  --cyan2:#0ba9ff;
-  --green:#6dffb0;
-  --red:#ff5470;
-  --text:#d9f8ff;
-  --muted:#7193a2;
+  --cyan:#00eaff;
+  --cyan2:#55f7ff;
+  --blue:#168dff;
+  --green:#00ff9d;
+  --yellow:#ffd84d;
+  --red:#ff4268;
+  --bg:#010509;
+  --panel:rgba(2,14,23,.72);
+  --line:rgba(0,234,255,.22);
+  --text:#dffcff;
+  --muted:#6d9aa5;
+  --shadow:0 0 30px rgba(0,234,255,.12);
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
 html,body{
   margin:0;
   width:100%;
-  height:100%;
-  overflow:hidden;
-  background:var(--bg);
+  min-height:100%;
+  background:#010509;
   color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Display",
+    "Segoe UI",
+    sans-serif;
+  overflow-x:hidden;
 }
+
 body{
-  position:relative;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% 38%,rgba(0,130,180,.11),transparent 32%),
+    radial-gradient(circle at 10% 80%,rgba(0,90,150,.08),transparent 30%),
+    #010509;
 }
+
+button,input,textarea{
+  font:inherit;
+}
+
+button{
+  color:inherit;
+}
+
 canvas{
   position:fixed;
   inset:0;
-  width:100%;
-  height:100%;
   pointer-events:none;
 }
-#stars{z-index:0}
-#network{z-index:2}
-.app{
+
+#stars{
+  z-index:0;
+}
+
+#grid{
+  z-index:1;
+  opacity:.42;
+}
+
+#app{
   position:relative;
   z-index:5;
-  width:100%;
-  height:100%;
-  display:flex;
-  flex-direction:column;
+  min-height:100vh;
   padding:
-    calc(env(safe-area-inset-top) + 10px)
+    env(safe-area-inset-top)
     12px
-    calc(env(safe-area-inset-bottom) + 12px);
+    calc(18px + env(safe-area-inset-bottom));
 }
-.header{
+
+/* =========================
+   TOP BAR
+========================= */
+
+.topbar{
+  height:62px;
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  min-height:42px;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  position:relative;
 }
+
 .brand{
   display:flex;
   align-items:center;
   gap:10px;
 }
-.logo{
-  width:32px;
-  height:32px;
+
+.brandCore{
+  width:31px;
+  height:31px;
   border:1px solid var(--cyan);
   border-radius:50%;
   position:relative;
-  box-shadow:0 0 16px rgba(85,234,255,.4);
+  box-shadow:
+    0 0 12px rgba(0,234,255,.5),
+    inset 0 0 10px rgba(0,234,255,.25);
+  animation:corePulse 2s infinite;
 }
-.logo:before,
-.logo:after{
+
+.brandCore:before,
+.brandCore:after{
   content:"";
   position:absolute;
   inset:6px;
-  border:1px solid rgba(85,234,255,.65);
+  border:1px solid rgba(0,234,255,.7);
   border-radius:50%;
 }
-.logo:after{
-  inset:13px;
+
+.brandCore:after{
+  inset:12px;
   background:var(--cyan);
-  box-shadow:0 0 14px var(--cyan);
+  box-shadow:0 0 12px var(--cyan);
+  border:0;
 }
-.title{
-  font-weight:700;
+
+.brandName{
   letter-spacing:5px;
-  font-size:17px;
+  font-size:15px;
+  font-weight:700;
 }
-.status{
-  font-size:10px;
-  letter-spacing:2px;
-  color:var(--green);
-  text-align:right;
-}
-.status span{
-  display:block;
+
+.brandSub{
   color:var(--muted);
+  font-size:8px;
+  letter-spacing:2px;
   margin-top:3px;
 }
-.main{
-  flex:1;
-  min-height:0;
+
+.status{
   display:flex;
-  flex-direction:column;
-  gap:8px;
-  margin-top:6px;
+  align-items:center;
+  gap:7px;
+  font-size:8px;
+  letter-spacing:1.5px;
+  color:#83c8d2;
 }
-.hud{
+
+.statusDot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 10px var(--green);
+}
+
+#clock{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:monospace;
+  font-size:9px;
+  color:#4d8b96;
+  letter-spacing:2px;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+  min-height:405px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   position:relative;
-  flex:0 0 46%;
-  min-height:250px;
   overflow:hidden;
-  border:1px solid var(--line);
-  border-radius:22px;
-  background:
-    radial-gradient(circle at center,rgba(0,175,255,.12),transparent 42%),
-    linear-gradient(180deg,rgba(5,18,29,.72),rgba(1,6,11,.84));
-  box-shadow:
-    inset 0 0 50px rgba(0,160,255,.05),
-    0 0 30px rgba(0,120,255,.05);
 }
-.hud:before{
+
+.heroGlow{
+  position:absolute;
+  width:390px;
+  height:390px;
+  border-radius:50%;
+  background:radial-gradient(
+    circle,
+    rgba(0,234,255,.13),
+    rgba(0,100,180,.05) 35%,
+    transparent 70%
+  );
+  filter:blur(5px);
+}
+
+.core{
+  width:225px;
+  height:225px;
+  border-radius:50%;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.coreRing{
+  position:absolute;
+  border-radius:50%;
+  border:1px solid rgba(0,234,255,.35);
+}
+
+.r1{
+  inset:2px;
+  border-top-color:var(--cyan);
+  border-bottom-color:rgba(0,234,255,.08);
+  animation:spin 8s linear infinite;
+}
+
+.r2{
+  inset:13px;
+  border-left-color:var(--cyan);
+  border-right-color:rgba(0,234,255,.08);
+  animation:spinReverse 5s linear infinite;
+}
+
+.r3{
+  inset:27px;
+  border:1px dashed rgba(0,234,255,.35);
+  animation:spin 13s linear infinite;
+}
+
+.r4{
+  inset:42px;
+  border-color:rgba(0,234,255,.18);
+}
+
+.coreInner{
+  width:105px;
+  height:105px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,
+      rgba(255,255,255,.9) 0%,
+      rgba(0,234,255,.8) 5%,
+      rgba(0,110,160,.4) 25%,
+      rgba(0,30,45,.8) 58%,
+      transparent 72%);
+  box-shadow:
+    0 0 18px rgba(0,234,255,.8),
+    0 0 50px rgba(0,150,255,.4),
+    inset 0 0 25px rgba(0,234,255,.6);
+  animation:breath 2.5s ease-in-out infinite;
+}
+
+.core.active .coreInner{
+  animation:
+    breath .7s ease-in-out infinite,
+    coreFlash .9s linear infinite;
+}
+
+.core.active .r1{
+  animation-duration:1.7s;
+}
+
+.core.active .r2{
+  animation-duration:1.1s;
+}
+
+.core.active .r3{
+  animation-duration:2.4s;
+}
+
+.coreLabel{
+  position:absolute;
+  bottom:15px;
+  left:0;
+  right:0;
+  text-align:center;
+  font-family:monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  color:#5ea8b5;
+}
+
+#coreState{
+  color:var(--cyan);
+}
+
+/* =========================
+   HUD CORNERS
+========================= */
+
+.corner{
+  position:absolute;
+  width:82px;
+  height:62px;
+  opacity:.7;
+}
+
+.corner:before,
+.corner:after{
   content:"";
+  position:absolute;
+}
+
+.corner:before{
+  width:45px;
+  height:1px;
+  background:var(--cyan);
+}
+
+.corner:after{
+  width:1px;
+  height:32px;
+  background:var(--cyan);
+}
+
+.tl{top:35px;left:4px}
+.tr{top:35px;right:4px;transform:scaleX(-1)}
+.bl{bottom:20px;left:4px;transform:scaleY(-1)}
+.br{bottom:20px;right:4px;transform:scale(-1)}
+
+.cornerText{
+  position:absolute;
+  top:7px;
+  left:7px;
+  font-size:7px;
+  color:#4e8892;
+  letter-spacing:1px;
+}
+
+/* =========================
+   TARGETS
+========================= */
+
+.targets{
   position:absolute;
   inset:0;
-  background:
-    linear-gradient(rgba(80,220,255,.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(80,220,255,.035) 1px,transparent 1px);
-  background-size:28px 28px;
-  mask-image:linear-gradient(to bottom,black,transparent);
+  pointer-events:none;
 }
-.hud-label{
+
+.target{
   position:absolute;
-  top:11px;
-  left:14px;
-  z-index:5;
-  font-size:9px;
-  letter-spacing:2px;
-  color:#6e9baa;
-}
-.hud-state{
-  position:absolute;
-  top:11px;
-  right:14px;
-  z-index:5;
-  font-size:9px;
-  letter-spacing:1.5px;
-  color:var(--green);
-}
-.globe{
-  position:absolute;
-  width:min(62vw,280px);
-  height:min(62vw,280px);
-  max-width:280px;
-  max-height:280px;
-  left:50%;
-  top:52%;
-  transform:translate(-50%,-50%);
-  border:1px solid rgba(85,234,255,.55);
-  border-radius:50%;
-  box-shadow:
-    0 0 25px rgba(0,190,255,.16),
-    inset 0 0 45px rgba(0,190,255,.08);
-}
-.globe:before{
-  content:"";
-  position:absolute;
-  inset:7%;
-  border:1px solid rgba(85,234,255,.22);
-  border-radius:50%;
-  transform:rotate(18deg) scaleX(.42);
-}
-.globe:after{
-  content:"";
-  position:absolute;
-  inset:7%;
-  border:1px solid rgba(85,234,255,.22);
-  border-radius:50%;
-  transform:rotate(-18deg) scaleX(.42);
-}
-.latitude{
-  position:absolute;
-  left:5%;
-  right:5%;
-  top:50%;
-  height:1px;
-  background:rgba(85,234,255,.22);
-  box-shadow:0 -43px 0 rgba(85,234,255,.12),0 43px 0 rgba(85,234,255,.12);
-}
-.longitude{
-  position:absolute;
-  inset:5%;
-  border-left:1px solid rgba(85,234,255,.17);
-  border-right:1px solid rgba(85,234,255,.17);
-  border-radius:50%;
-}
-.scan{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:50%;
-  height:1px;
-  transform-origin:left center;
-  background:linear-gradient(90deg,transparent,var(--cyan));
-  box-shadow:0 0 9px var(--cyan);
-  opacity:.35;
-  animation:scan 4s linear infinite;
-}
-@keyframes scan{
-  from{transform:rotate(0deg)}
-  to{transform:rotate(360deg)}
-}
-.core{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:74px;
-  height:74px;
-  transform:translate(-50%,-50%);
-  border:1px solid rgba(85,234,255,.75);
+  width:72px;
+  height:72px;
+  border:1px solid rgba(0,234,255,.16);
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:radial-gradient(circle,rgba(50,220,255,.22),rgba(0,20,30,.82) 65%);
-  box-shadow:0 0 30px rgba(0,210,255,.28);
-  z-index:4;
 }
-.core-inner{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  border:1px solid var(--cyan);
-  box-shadow:0 0 18px var(--cyan);
-  animation:corePulse 1.8s ease-in-out infinite;
-}
-@keyframes corePulse{
-  50%{transform:scale(1.25);opacity:.55}
-}
-.target{
+
+.target:before{
+  content:"";
   position:absolute;
-  width:9px;
-  height:9px;
-  border:1px solid var(--cyan);
+  inset:10px;
+  border:1px dashed rgba(0,234,255,.17);
   border-radius:50%;
-  box-shadow:0 0 12px var(--cyan);
-  opacity:0;
-  transform:scale(.2);
-  transition:.4s;
-  z-index:4;
 }
-.target.active{
-  opacity:1;
-  transform:scale(1);
-}
+
 .target:after{
   content:"";
   position:absolute;
-  width:25px;
-  height:25px;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  border:1px solid rgba(85,234,255,.22);
+  width:3px;
+  height:3px;
   border-radius:50%;
-  animation:targetPulse 1.3s infinite;
+  background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);
 }
-@keyframes targetPulse{
-  50%{transform:translate(-50%,-50%) scale(1.7);opacity:0}
-}
-.t1{left:23%;top:34%}
-.t2{left:74%;top:31%}
-.t3{left:17%;top:69%}
-.t4{left:79%;top:68%}
-.t5{left:38%;top:19%}
-.t6{left:62%;top:79%}
-.hud-corner{
+
+.target span{
+  font-family:monospace;
+  font-size:7px;
+  color:#407985;
   position:absolute;
-  width:28px;
-  height:28px;
-  border-color:rgba(85,234,255,.6);
-  z-index:4;
+  top:78px;
+  white-space:nowrap;
 }
-.c1{top:10px;left:10px;border-top:1px solid;border-left:1px solid}
-.c2{top:10px;right:10px;border-top:1px solid;border-right:1px solid}
-.c3{bottom:10px;left:10px;border-bottom:1px solid;border-left:1px solid}
-.c4{bottom:10px;right:10px;border-bottom:1px solid;border-right:1px solid}
-.activity{
-  flex:1;
-  min-height:0;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:7px;
-  overflow:hidden;
+
+.t1{left:7%;top:24%}
+.t2{right:8%;top:18%}
+.t3{left:2%;bottom:20%}
+.t4{right:4%;bottom:22%}
+.t5{left:20%;top:8%}
+.t6{right:21%;top:7%}
+
+.target.scanning{
+  border-color:var(--cyan);
+  box-shadow:0 0 22px rgba(0,234,255,.28);
+  animation:targetPulse .8s infinite;
 }
-.panel{
-  min-height:0;
+
+/* =========================
+   SEARCH HUD
+========================= */
+
+.searchBox{
+  margin:0 auto 12px;
+  max-width:900px;
   border:1px solid var(--line);
-  border-radius:14px;
-  background:var(--panel);
-  overflow:hidden;
-  position:relative;
+  background:rgba(0,12,20,.7);
+  backdrop-filter:blur(15px);
+  box-shadow:var(--shadow);
+  padding:10px;
 }
-.panel-title{
-  height:28px;
+
+.searchRow{
+  display:flex;
+  gap:8px;
+}
+
+#query{
+  min-width:0;
+  flex:1;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(0,234,255,.18);
+  outline:none;
+  color:var(--text);
+  padding:13px 14px;
+  border-radius:4px;
+  font-size:13px;
+}
+
+#query::placeholder{
+  color:#456b73;
+}
+
+#query:focus{
+  border-color:rgba(0,234,255,.65);
+  box-shadow:0 0 15px rgba(0,234,255,.1);
+}
+
+.actionBtn{
+  border:1px solid rgba(0,234,255,.4);
+  background:rgba(0,234,255,.08);
+  min-width:52px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.actionBtn:active{
+  transform:scale(.95);
+}
+
+.actionBtn:hover{
+  background:rgba(0,234,255,.18);
+  box-shadow:0 0 20px rgba(0,234,255,.18);
+}
+
+.searchMeta{
+  display:flex;
+  justify-content:space-between;
+  margin-top:8px;
+  font-family:monospace;
+  font-size:7px;
+  color:#477c85;
+  letter-spacing:1px;
+}
+
+/* =========================
+   RESEARCH PANEL
+========================= */
+
+.research{
+  max-width:1100px;
+  margin:auto;
+  border:1px solid var(--line);
+  background:rgba(1,10,17,.75);
+  backdrop-filter:blur(16px);
+}
+
+.panelHeader{
+  height:38px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:0 9px;
-  border-bottom:1px solid rgba(80,220,255,.1);
-  font-size:8px;
-  letter-spacing:1.5px;
-  color:#6f9aa9;
-}
-.panel-body{
-  padding:7px;
-  overflow:hidden;
-  height:calc(100% - 28px);
-}
-.tiles{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:5px;
-  height:100%;
-}
-.tile{
-  border:1px solid rgba(80,220,255,.12);
-  background:rgba(0,20,31,.5);
-  border-radius:8px;
-  padding:6px;
-  overflow:hidden;
-  opacity:.55;
-  transition:.25s;
-}
-.tile.active{
-  opacity:1;
-  border-color:rgba(85,234,255,.45);
-  box-shadow:0 0 12px rgba(0,190,255,.08);
-}
-.tile.done{
-  border-color:rgba(109,255,176,.35);
-}
-.tile-head{
-  display:flex;
-  justify-content:space-between;
-  font-size:7px;
-  color:#7196a5;
-  margin-bottom:5px;
-}
-.tile-main{
-  font-size:9px;
-  line-height:1.25;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.tile-status{
-  margin-top:4px;
-  font-size:7px;
-  color:var(--cyan);
-}
-.log{
-  height:100%;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-end;
-  gap:4px;
-}
-.log-line{
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-size:7px;
-  line-height:1.2;
-  color:#79a4b3;
-  animation:logIn .25s ease-out;
-}
-.log-line b{color:var(--cyan)}
-@keyframes logIn{
-  from{opacity:0;transform:translateX(-8px)}
-  to{opacity:1;transform:none}
-}
-.chat{
-  flex:0 0 26%;
-  min-height:120px;
-  border:1px solid var(--line);
-  border-radius:16px;
-  background:rgba(3,11,18,.72);
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-}
-.messages{
-  flex:1;
-  overflow:auto;
-  padding:9px;
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-  scroll-behavior:smooth;
-}
-.msg{
-  max-width:88%;
-  padding:7px 9px;
-  border-radius:10px;
-  font-size:12px;
-  line-height:1.35;
-  white-space:pre-wrap;
-}
-.msg.ai{
-  align-self:flex-start;
-  background:rgba(0,70,100,.23);
-  border:1px solid rgba(85,234,255,.14);
-}
-.msg.user{
-  align-self:flex-end;
-  background:rgba(0,125,170,.18);
-  border:1px solid rgba(85,234,255,.18);
-}
-.composer{
-  display:flex;
-  gap:7px;
-  padding:8px;
-  border-top:1px solid rgba(80,220,255,.1);
-}
-input{
-  flex:1;
-  min-width:0;
-  height:40px;
-  border:1px solid rgba(85,234,255,.18);
-  border-radius:12px;
-  background:rgba(0,12,20,.9);
-  color:var(--text);
+  border-bottom:1px solid var(--line);
   padding:0 12px;
-  outline:none;
-  font-size:13px;
 }
-button{
-  border:1px solid rgba(85,234,255,.25);
+
+.panelTitle{
+  font-family:monospace;
+  font-size:8px;
+  letter-spacing:2px;
   color:var(--cyan);
-  background:rgba(0,25,38,.82);
-  border-radius:12px;
-  height:40px;
-  min-width:42px;
-  font-size:17px;
 }
-button:active{
-  transform:scale(.95);
+
+.panelStatus{
+  font-family:monospace;
+  font-size:7px;
+  color:#4d8791;
 }
-button.active{
-  border-color:var(--cyan);
-  box-shadow:0 0 16px rgba(85,234,255,.25);
+
+.tabs{
+  display:flex;
+  overflow-x:auto;
+  border-bottom:1px solid rgba(0,234,255,.13);
+  scrollbar-width:none;
 }
-.search-overlay{
-  position:fixed;
-  inset:0;
-  z-index:20;
-  pointer-events:none;
-  opacity:0;
-  transition:.3s;
+
+.tabs::-webkit-scrollbar{
+  display:none;
+}
+
+.tab{
+  flex:1;
+  min-width:110px;
+  padding:10px;
+  border:0;
+  border-right:1px solid rgba(0,234,255,.1);
+  background:rgba(0,0,0,.18);
+  color:#537d85;
+  font-size:8px;
+  letter-spacing:1px;
+  white-space:nowrap;
+}
+
+.tab.active{
+  color:var(--cyan);
+  background:rgba(0,234,255,.07);
+  box-shadow:inset 0 -2px 0 var(--cyan);
+}
+
+.sourceArea{
+  min-height:230px;
+  padding:12px;
+}
+
+.emptyState{
+  min-height:200px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:8px;
+  color:#345862;
+}
+
+.emptyIcon{
+  font-size:30px;
+  opacity:.5;
+}
+
+.emptyText{
+  font-family:monospace;
+  font-size:8px;
+  letter-spacing:2px;
+}
+
+/* =========================
+   SOURCE CARDS
+========================= */
+
+.sources{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+
+.source{
+  position:relative;
+  border:1px solid rgba(0,234,255,.14);
   background:
-    radial-gradient(circle at center,rgba(0,180,255,.08),transparent 45%),
-    rgba(0,3,7,.25);
+    linear-gradient(
+      135deg,
+      rgba(0,234,255,.055),
+      rgba(0,0,0,.2)
+    );
+  padding:11px;
+  min-height:125px;
+  overflow:hidden;
+  animation:sourceIn .45s both;
 }
-.search-overlay.active{
-  opacity:1;
-}
-.scanline{
+
+.source:before{
+  content:"";
   position:absolute;
+  top:0;
   left:0;
-  right:0;
-  height:2px;
-  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
-  box-shadow:0 0 20px var(--cyan);
-  opacity:0;
+  width:28px;
+  height:1px;
+  background:var(--cyan);
 }
-.search-overlay.active .scanline{
-  animation:scanline 1.5s linear infinite;
+
+.source:hover{
+  border-color:rgba(0,234,255,.4);
 }
-@keyframes scanline{
-  0%{top:15%;opacity:0}
-  15%{opacity:1}
-  85%{opacity:1}
-  100%{top:85%;opacity:0}
-}
-.processing{
-  position:fixed;
-  left:50%;
-  bottom:calc(env(safe-area-inset-bottom) + 75px);
-  transform:translateX(-50%);
-  z-index:30;
-  width:min(92%,420px);
-  opacity:0;
-  pointer-events:none;
-  transition:.25s;
-}
-.processing.active{
-  opacity:1;
-}
-.proc-box{
-  padding:9px 11px;
-  border:1px solid rgba(85,234,255,.28);
-  border-radius:12px;
-  background:rgba(2,12,20,.92);
-  backdrop-filter:blur(12px);
-  box-shadow:0 0 25px rgba(0,160,255,.12);
-}
-.proc-top{
+
+.sourceTop{
   display:flex;
   justify-content:space-between;
-  font-size:9px;
-  letter-spacing:1.3px;
+  gap:7px;
   margin-bottom:7px;
 }
-.proc-bar{
-  height:3px;
-  background:rgba(85,234,255,.08);
-  overflow:hidden;
-  border-radius:5px;
+
+.sourceDomain{
+  color:var(--cyan);
+  font-family:monospace;
+  font-size:7px;
+  text-transform:uppercase;
 }
-.proc-fill{
+
+.sourceNo{
+  color:#315761;
+  font-family:monospace;
+  font-size:7px;
+}
+
+.sourceTitle{
+  font-size:11px;
+  line-height:1.35;
+  font-weight:600;
+  margin-bottom:7px;
+}
+
+.sourceSnippet{
+  font-size:9px;
+  line-height:1.45;
+  color:#71959d;
+}
+
+.sourceBottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:10px;
+}
+
+.sourceState{
+  font-family:monospace;
+  font-size:6px;
+  color:var(--green);
+}
+
+.openSource{
+  border:1px solid rgba(0,234,255,.2);
+  background:rgba(0,234,255,.05);
+  padding:5px 7px;
+  color:#76cbd4;
+  font-size:7px;
+  text-decoration:none;
+}
+
+/* =========================
+   OPERATIONS
+========================= */
+
+.operations{
+  max-width:1100px;
+  margin:12px auto 0;
+}
+
+.sectionLabel{
+  font-family:monospace;
+  font-size:8px;
+  color:#4e8c96;
+  letter-spacing:2px;
+  margin:14px 2px 8px;
+}
+
+.opGrid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+.op{
+  min-height:80px;
+  border:1px solid rgba(0,234,255,.12);
+  background:rgba(0,10,17,.68);
+  padding:9px;
+  position:relative;
+  overflow:hidden;
+}
+
+.op.active{
+  border-color:rgba(0,234,255,.5);
+  box-shadow:
+    inset 0 0 25px rgba(0,234,255,.05),
+    0 0 15px rgba(0,234,255,.08);
+}
+
+.opHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.opIcon{
+  font-size:14px;
+}
+
+.opState{
+  font-family:monospace;
+  font-size:6px;
+  color:#416c75;
+}
+
+.op.active .opState{
+  color:var(--cyan);
+}
+
+.opName{
+  font-family:monospace;
+  font-size:7px;
+  letter-spacing:1px;
+  margin-top:9px;
+  color:#78aeb6;
+}
+
+.opBar{
+  height:2px;
+  background:rgba(0,234,255,.08);
+  margin-top:8px;
+  overflow:hidden;
+}
+
+.opBar span{
+  display:block;
   height:100%;
   width:0%;
   background:var(--cyan);
-  box-shadow:0 0 10px var(--cyan);
-  transition:width .25s linear;
+  box-shadow:0 0 8px var(--cyan);
+  transition:width .3s;
 }
-.research-tabs{
-  position:absolute;
-  left:10px;
-  right:10px;
-  bottom:10px;
-  display:flex;
-  gap:5px;
-  z-index:5;
+
+/* =========================
+   WORLD MAP
+========================= */
+
+.mapPanel{
+  max-width:1100px;
+  margin:12px auto 0;
+  height:250px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0,150,190,.08),
+      transparent 65%
+    ),
+    rgba(0,8,14,.75);
   overflow:hidden;
+  position:relative;
 }
-.rtab{
+
+.mapGrid{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(rgba(0,234,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,234,255,.045) 1px,transparent 1px);
+  background-size:25px 25px;
+  transform:perspective(500px) rotateX(45deg) scale(1.4);
+  transform-origin:center bottom;
+  opacity:.5;
+}
+
+.mapWorld{
+  position:absolute;
+  left:8%;
+  right:8%;
+  top:22%;
+  bottom:15%;
+  border:1px solid rgba(0,234,255,.18);
+  border-radius:50%;
+  transform:scaleY(.48);
+  box-shadow:
+    inset 0 0 40px rgba(0,234,255,.04),
+    0 0 30px rgba(0,234,255,.03);
+}
+
+.mapWorld:before{
+  content:"";
+  position:absolute;
+  inset:12%;
+  border:1px dashed rgba(0,234,255,.12);
+  border-radius:50%;
+}
+
+.mapWorld:after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:0;
+  bottom:0;
+  border-left:1px dashed rgba(0,234,255,.11);
+}
+
+.mapPoint{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--cyan);
+  box-shadow:
+    0 0 5px var(--cyan),
+    0 0 18px var(--cyan);
+  position:absolute;
+  opacity:.2;
+  transform:scaleY(2);
+}
+
+.mapPoint.active{
+  opacity:1;
+  animation:mapPing 1.2s infinite;
+}
+
+.p1{left:26%;top:37%}
+.p2{left:43%;top:48%}
+.p3{left:52%;top:42%}
+.p4{left:61%;top:49%}
+.p5{left:72%;top:40%}
+.p6{left:81%;top:56%}
+.p7{left:34%;top:62%}
+.p8{left:57%;top:64%}
+
+.mapLabel{
+  position:absolute;
+  font-family:monospace;
+  font-size:6px;
+  color:#417b85;
+  letter-spacing:1px;
+}
+
+.mapLabel.top{
+  top:8px;
+  left:10px;
+}
+
+.mapLabel.bottom{
+  bottom:8px;
+  right:10px;
+}
+
+/* =========================
+   ACTIVITY
+========================= */
+
+.activity{
+  max-width:1100px;
+  margin:12px auto 0;
+  border:1px solid rgba(0,234,255,.14);
+  background:rgba(0,7,12,.75);
+}
+
+.activityLog{
+  height:145px;
+  overflow:auto;
+  padding:9px;
+  font-family:monospace;
+  font-size:7px;
+  line-height:1.7;
+}
+
+.log{
+  color:#4f7c85;
+}
+
+.log .time{
+  color:#315963;
+}
+
+.log.good{
+  color:#75cdb6;
+}
+
+.log.info{
+  color:#67b9c4;
+}
+
+.log.warn{
+  color:#d4ae52;
+}
+
+.log.error{
+  color:#ff6680;
+}
+
+/* =========================
+   CHAT
+========================= */
+
+.chat{
+  max-width:1100px;
+  margin:12px auto 0;
+  border:1px solid var(--line);
+  background:rgba(0,9,15,.82);
+}
+
+.messages{
+  min-height:180px;
+  max-height:370px;
+  overflow:auto;
+  padding:12px;
+}
+
+.message{
+  max-width:90%;
+  padding:10px 11px;
+  margin-bottom:9px;
+  border:1px solid rgba(0,234,255,.12);
+  font-size:10px;
+  line-height:1.5;
+}
+
+.message.ai{
+  background:rgba(0,234,255,.045);
+  border-left:2px solid var(--cyan);
+}
+
+.message.user{
+  margin-left:auto;
+  background:rgba(255,255,255,.025);
+  border-right:2px solid #7198a0;
+}
+
+.messageLabel{
+  font-family:monospace;
+  font-size:6px;
+  letter-spacing:1px;
+  color:#467d86;
+  margin-bottom:4px;
+}
+
+.chatInput{
+  display:flex;
+  border-top:1px solid rgba(0,234,255,.14);
+  padding:8px;
+  gap:7px;
+}
+
+#chatText{
   flex:1;
   min-width:0;
-  padding:5px 6px;
-  border:1px solid rgba(85,234,255,.13);
-  border-radius:6px;
-  background:rgba(0,15,24,.7);
+  resize:none;
+  height:42px;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(0,234,255,.14);
+  color:var(--text);
+  padding:10px;
+  outline:none;
+  font-size:10px;
+}
+
+#send{
+  width:48px;
+  border:1px solid rgba(0,234,255,.35);
+  background:rgba(0,234,255,.08);
+}
+
+/* =========================
+   BOTTOM CONTROLS
+========================= */
+
+.controls{
+  max-width:1100px;
+  margin:12px auto 0;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+
+.control{
+  border:1px solid rgba(0,234,255,.18);
+  background:rgba(0,10,17,.7);
+  padding:10px 8px;
+  font-family:monospace;
   font-size:7px;
-  color:#7094a2;
-  opacity:0;
-  transform:translateY(12px);
-  transition:.3s;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  letter-spacing:1px;
+  color:#669ba4;
 }
-.rtab.open{
-  opacity:1;
-  transform:none;
+
+.control:active{
+  background:rgba(0,234,255,.12);
 }
-.rtab.live{
-  border-color:rgba(85,234,255,.42);
-  color:var(--cyan);
-  box-shadow:0 0 10px rgba(0,190,255,.08);
+
+.volume{
+  width:100%;
 }
-.rtab.done{
-  color:var(--green);
-  border-color:rgba(109,255,176,.3);
-}
-.flash{
+
+/* =========================
+   PROCESSING OVERLAY
+========================= */
+
+.processing{
   position:fixed;
   inset:0;
-  z-index:50;
-  pointer-events:none;
+  z-index:100;
+  background:rgba(0,3,7,.88);
+  backdrop-filter:blur(13px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+.processing.show{
+  display:flex;
+}
+
+.processingBox{
+  width:min(520px,92vw);
+  border:1px solid rgba(0,234,255,.35);
+  background:rgba(0,13,21,.9);
+  box-shadow:
+    0 0 60px rgba(0,234,255,.08),
+    inset 0 0 40px rgba(0,234,255,.03);
+  padding:20px;
+}
+
+.processingTitle{
+  font-family:monospace;
+  color:var(--cyan);
+  letter-spacing:3px;
+  font-size:10px;
+}
+
+.processingQuery{
+  margin-top:8px;
+  font-size:14px;
+  line-height:1.4;
+}
+
+.phaseList{
+  margin-top:18px;
+}
+
+.phase{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:7px 0;
+  color:#3f6972;
+  font-family:monospace;
+  font-size:7px;
+  letter-spacing:1px;
+}
+
+.phaseDot{
+  width:7px;
+  height:7px;
+  border:1px solid #3f6972;
+  border-radius:50%;
+}
+
+.phase.active{
+  color:var(--cyan);
+}
+
+.phase.active .phaseDot{
+  background:var(--cyan);
+  border-color:var(--cyan);
+  box-shadow:0 0 12px var(--cyan);
+}
+
+.phase.done{
+  color:#5db89e;
+}
+
+.phase.done .phaseDot{
+  background:#5db89e;
+  border-color:#5db89e;
+}
+
+.scanLine{
+  height:1px;
+  margin-top:15px;
+  background:rgba(0,234,255,.1);
+  overflow:hidden;
+}
+
+.scanLine span{
+  display:block;
+  height:100%;
+  width:35%;
+  background:var(--cyan);
+  box-shadow:0 0 12px var(--cyan);
+  animation:scanLine 1.2s linear infinite;
+}
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+  position:fixed;
+  z-index:200;
+  left:50%;
+  bottom:25px;
+  transform:translate(-50%,20px);
   opacity:0;
-  background:rgba(85,234,255,.07);
+  pointer-events:none;
+  border:1px solid rgba(0,234,255,.3);
+  background:rgba(0,13,21,.95);
+  padding:10px 15px;
+  font-family:monospace;
+  font-size:8px;
+  color:var(--cyan);
+  transition:.25s;
 }
-.flash.hit{
-  animation:flash .28s ease-out;
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
 }
-@keyframes flash{
-  0%{opacity:1}
-  100%{opacity:0}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:650px){
+
+  .hero{
+    min-height:355px;
+  }
+
+  .core{
+    transform:scale(.85);
+  }
+
+  .target{
+    transform:scale(.72);
+  }
+
+  .t5,.t6{
+    display:none;
+  }
+
+  .sources{
+    grid-template-columns:1fr;
+  }
+
+  .opGrid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .mapPanel{
+    height:210px;
+  }
+
+  #clock{
+    display:none;
+  }
 }
-@media(max-height:700px){
-  .hud{flex-basis:42%;min-height:210px}
-  .chat{flex-basis:29%}
-  .msg{font-size:11px}
+
+@media(min-width:900px){
+
+  #app{
+    padding-left:30px;
+    padding-right:30px;
+  }
+
+  .hero{
+    min-height:470px;
+  }
+
+  .core{
+    width:280px;
+    height:280px;
+  }
+
+  .coreInner{
+    width:130px;
+    height:130px;
+  }
 }
-@media(min-width:700px){
-  .app{max-width:900px;margin:auto}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+@keyframes spinReverse{
+  to{transform:rotate(-360deg)}
+}
+
+@keyframes breath{
+  0%,100%{
+    transform:scale(.94);
+    opacity:.82;
+  }
+  50%{
+    transform:scale(1.06);
+    opacity:1;
+  }
+}
+
+@keyframes coreFlash{
+  0%,100%{filter:brightness(1)}
+  50%{filter:brightness(1.7)}
+}
+
+@keyframes corePulse{
+  0%,100%{box-shadow:0 0 10px rgba(0,234,255,.35)}
+  50%{box-shadow:0 0 22px rgba(0,234,255,.7)}
+}
+
+@keyframes targetPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.08)}
+}
+
+@keyframes mapPing{
+  0%{
+    transform:scaleY(2) scale(1);
+    box-shadow:0 0 5px var(--cyan),0 0 15px var(--cyan);
+  }
+  50%{
+    transform:scaleY(2) scale(1.7);
+    box-shadow:0 0 8px var(--cyan),0 0 35px var(--cyan);
+  }
+  100%{
+    transform:scaleY(2) scale(1);
+    box-shadow:0 0 5px var(--cyan),0 0 15px var(--cyan);
+  }
+}
+
+@keyframes sourceIn{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+@keyframes scanLine{
+  from{transform:translateX(-130%)}
+  to{transform:translateX(400%)}
 }
 </style>
 </head>
+
 <body>
+
 <canvas id="stars"></canvas>
-<canvas id="network"></canvas>
-<div class="search-overlay" id="searchOverlay">
-  <div class="scanline"></div>
-</div>
-<div class="flash" id="flash"></div>
-<div class="app">
-  <header class="header">
+<canvas id="grid"></canvas>
+
+<div id="app">
+
+  <!-- =========================
+       TOP
+  ========================== -->
+
+  <header class="topbar">
+
     <div class="brand">
-      <div class="logo"></div>
-      <div class="title">LUCEN</div>
+
+      <div class="brandCore"></div>
+
+      <div>
+        <div class="brandName">LUCEN</div>
+        <div class="brandSub">
+          PERSONAL INTELLIGENCE SYSTEM
+        </div>
+      </div>
+
     </div>
-    <div class="status" id="systemStatus">
-      ONLINE
-      <span id="statusSub">AI CORE READY</span>
+
+    <div id="clock"></div>
+
+    <div class="status">
+      <span class="statusDot"></span>
+      <span id="systemStatus">SYSTEM ONLINE</span>
     </div>
+
   </header>
-  <main class="main">
-    <section class="hud" id="hud">
-      <div class="hud-label">GLOBAL INTELLIGENCE NETWORK</div>
-      <div class="hud-state" id="hudState">STANDBY</div>
-      <div class="hud-corner c1"></div>
-      <div class="hud-corner c2"></div>
-      <div class="hud-corner c3"></div>
-      <div class="hud-corner c4"></div>
-      <div class="globe">
-        <div class="latitude"></div>
-        <div class="longitude"></div>
-        <div class="scan"></div>
-        <div class="core">
-          <div class="core-inner"></div>
-        </div>
+
+
+  <!-- =========================
+       HERO CORE
+  ========================== -->
+
+  <section class="hero">
+
+    <div class="heroGlow"></div>
+
+    <div class="corner tl">
+      <span class="cornerText">CORE.01</span>
+    </div>
+
+    <div class="corner tr">
+      <span class="cornerText">NET.02</span>
+    </div>
+
+    <div class="corner bl">
+      <span class="cornerText">AI.03</span>
+    </div>
+
+    <div class="corner br">
+      <span class="cornerText">SEC.04</span>
+    </div>
+
+
+    <div class="targets">
+
+      <div class="target t1"><span>EUROPE</span></div>
+      <div class="target t2"><span>LIVE DATA</span></div>
+      <div class="target t3"><span>DATABASE</span></div>
+      <div class="target t4"><span>WEB NODE</span></div>
+      <div class="target t5"><span>SCAN</span></div>
+      <div class="target t6"><span>AI NODE</span></div>
+
+    </div>
+
+
+    <div class="core" id="core">
+
+      <div class="coreRing r1"></div>
+      <div class="coreRing r2"></div>
+      <div class="coreRing r3"></div>
+      <div class="coreRing r4"></div>
+
+      <div class="coreInner"></div>
+
+      <div class="coreLabel">
+        LUCEN // <span id="coreState">READY</span>
       </div>
-      <div class="target t1"></div>
-      <div class="target t2"></div>
-      <div class="target t3"></div>
-      <div class="target t4"></div>
-      <div class="target t5"></div>
-      <div class="target t6"></div>
-      <div class="research-tabs">
-        <div class="rtab" id="tab1">SOURCE 01</div>
-        <div class="rtab" id="tab2">SOURCE 02</div>
-        <div class="rtab" id="tab3">SOURCE 03</div>
-        <div class="rtab" id="tab4">SOURCE 04</div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       SEARCH
+  ========================== -->
+
+  <section class="searchBox">
+
+    <div class="searchRow">
+
+      <input
+        id="query"
+        autocomplete="off"
+        placeholder="Frag LUCEN etwas oder starte eine Recherche..."
+      >
+
+      <button
+        class="actionBtn"
+        id="voiceButton"
+        title="Voice"
+      >◉</button>
+
+      <button
+        class="actionBtn"
+        id="searchButton"
+        title="Search"
+      >⌕</button>
+
+    </div>
+
+    <div class="searchMeta">
+      <span id="searchMode">
+        MODE: INTELLIGENCE
+      </span>
+
+      <span id="connectionState">
+        NET::READY
+      </span>
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       RESEARCH
+  ========================== -->
+
+  <section class="research">
+
+    <div class="panelHeader">
+
+      <div class="panelTitle">
+        INTELLIGENCE // RESEARCH
       </div>
-    </section>
-    <section class="activity">
-      <div class="panel">
-        <div class="panel-title">
-          <span>LIVE OPERATIONS</span>
-          <span id="opCount">00</span>
-        </div>
-        <div class="panel-body">
-          <div class="tiles">
-            <div class="tile" id="tileAnalysis">
-              <div class="tile-head">
-                <span>01</span>
-                <span>CORE</span>
-              </div>
-              <div class="tile-main">ANALYSIS</div>
-              <div class="tile-status">STANDBY</div>
-            </div>
-            <div class="tile" id="tileSearch">
-              <div class="tile-head">
-                <span>02</span>
-                <span>NET</span>
-              </div>
-              <div class="tile-main">WORLD SEARCH</div>
-              <div class="tile-status">STANDBY</div>
-            </div>
-            <div class="tile" id="tileSources">
-              <div class="tile-head">
-                <span>03</span>
-                <span>DATA</span>
-              </div>
-              <div class="tile-main">SOURCES</div>
-              <div class="tile-status">WAITING</div>
-            </div>
-            <div class="tile" id="tileProcess">
-              <div class="tile-head">
-                <span>04</span>
-                <span>AI</span>
-              </div>
-              <div class="tile-main">PROCESSING</div>
-              <div class="tile-status">WAITING</div>
-            </div>
-            <div class="tile" id="tileVerify">
-              <div class="tile-head">
-                <span>05</span>
-                <span>QA</span>
-              </div>
-              <div class="tile-main">VERIFY</div>
-              <div class="tile-status">WAITING</div>
-            </div>
-            <div class="tile" id="tileResponse">
-              <div class="tile-head">
-                <span>06</span>
-                <span>OUT</span>
-              </div>
-              <div class="tile-main">RESPONSE</div>
-              <div class="tile-status">WAITING</div>
-            </div>
+
+      <div
+        class="panelStatus"
+        id="researchStatus"
+      >
+        STANDBY
+      </div>
+
+    </div>
+
+
+    <div class="tabs">
+
+      <button class="tab active" data-tab="sources">
+        SOURCES
+      </button>
+
+      <button class="tab" data-tab="analysis">
+        ANALYSIS
+      </button>
+
+      <button class="tab" data-tab="cross">
+        CROSS-CHECK
+      </button>
+
+      <button class="tab" data-tab="synthesis">
+        SYNTHESIS
+      </button>
+
+    </div>
+
+
+    <div class="sourceArea">
+
+      <div id="sourceContent">
+
+        <div class="emptyState">
+          <div class="emptyIcon">◎</div>
+          <div class="emptyText">
+            WAITING FOR COMMAND
           </div>
         </div>
+
       </div>
-      <div class="panel">
-        <div class="panel-title">
-          <span>SYSTEM ACTIVITY</span>
-          <span>LIVE</span>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       OPERATIONS
+  ========================== -->
+
+  <section class="operations">
+
+    <div class="sectionLabel">
+      LIVE OPERATIONS
+    </div>
+
+    <div class="opGrid">
+
+      <div class="op" id="opNetwork">
+        <div class="opHead">
+          <span class="opIcon">⌁</span>
+          <span class="opState">IDLE</span>
         </div>
-        <div class="panel-body">
-          <div class="log" id="activityLog"></div>
+        <div class="opName">NETWORK SEARCH</div>
+        <div class="opBar"><span></span></div>
+      </div>
+
+      <div class="op" id="opSources">
+        <div class="opHead">
+          <span class="opIcon">▤</span>
+          <span class="opState">IDLE</span>
         </div>
+        <div class="opName">SOURCE DISCOVERY</div>
+        <div class="opBar"><span></span></div>
       </div>
-    </section>
-    <section class="chat">
-      <div class="messages" id="messages">
-        <div class="msg ai">
-          LUCEN online. Bereit.
+
+      <div class="op" id="opProcess">
+        <div class="opHead">
+          <span class="opIcon">◌</span>
+          <span class="opState">IDLE</span>
         </div>
+        <div class="opName">DATA PROCESSING</div>
+        <div class="opBar"><span></span></div>
       </div>
-      <div class="composer">
-        <input
-          id="input"
-          autocomplete="off"
-          autocorrect="on"
-          placeholder="Nachricht an LUCEN..."
-        >
-        <button id="voiceBtn" aria-label="Voice">🎙️</button>
-        <button id="sendBtn" aria-label="Senden">➤</button>
+
+      <div class="op" id="opCross">
+        <div class="opHead">
+          <span class="opIcon">⊕</span>
+          <span class="opState">IDLE</span>
+        </div>
+        <div class="opName">CROSS CHECK</div>
+        <div class="opBar"><span></span></div>
       </div>
-    </section>
-  </main>
+
+      <div class="op" id="opAI">
+        <div class="opHead">
+          <span class="opIcon">✦</span>
+          <span class="opState">IDLE</span>
+        </div>
+        <div class="opName">AI SYNTHESIS</div>
+        <div class="opBar"><span></span></div>
+      </div>
+
+      <div class="op" id="opSecure">
+        <div class="opHead">
+          <span class="opIcon">◇</span>
+          <span class="opState">SECURE</span>
+        </div>
+        <div class="opName">SECURITY CORE</div>
+        <div class="opBar"><span style="width:100%"></span></div>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       WORLD MAP
+  ========================== -->
+
+  <section class="mapPanel">
+
+    <div class="mapGrid"></div>
+
+    <div class="mapWorld">
+
+      <span class="mapPoint p1"></span>
+      <span class="mapPoint p2"></span>
+      <span class="mapPoint p3"></span>
+      <span class="mapPoint p4"></span>
+      <span class="mapPoint p5"></span>
+      <span class="mapPoint p6"></span>
+      <span class="mapPoint p7"></span>
+      <span class="mapPoint p8"></span>
+
+    </div>
+
+    <div class="mapLabel top">
+      GLOBAL NETWORK // SEARCH NODES
+    </div>
+
+    <div class="mapLabel bottom">
+      LATENCY <span id="latency">--</span> MS
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       ACTIVITY
+  ========================== -->
+
+  <section class="activity">
+
+    <div class="panelHeader">
+
+      <div class="panelTitle">
+        SYSTEM ACTIVITY
+      </div>
+
+      <div class="panelStatus">
+        LIVE
+      </div>
+
+    </div>
+
+    <div id="activityLog" class="activityLog"></div>
+
+  </section>
+
+
+  <!-- =========================
+       CHAT
+  ========================== -->
+
+  <section class="chat">
+
+    <div class="panelHeader">
+
+      <div class="panelTitle">
+        LUCEN // CONVERSATION
+      </div>
+
+      <div
+        class="panelStatus"
+        id="voiceStatus"
+      >
+        VOICE STANDBY
+      </div>
+
+    </div>
+
+
+    <div id="messages" class="messages">
+
+      <div class="message ai">
+
+        <div class="messageLabel">
+          LUCEN
+        </div>
+
+        Systeme bereit. Ich kann recherchieren,
+        Informationen analysieren und Ergebnisse
+        strukturiert zusammenführen.
+
+      </div>
+
+    </div>
+
+
+    <div class="chatInput">
+
+      <textarea
+        id="chatText"
+        placeholder="Nachricht an LUCEN..."
+      ></textarea>
+
+      <button
+        class="actionBtn"
+        id="send"
+      >➤</button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       CONTROLS
+  ========================== -->
+
+  <section class="controls">
+
+    <button
+      class="control"
+      id="lucenSoundButton"
+    >
+      🔊 SOUND ON
+    </button>
+
+    <button
+      class="control"
+      id="clearButton"
+    >
+      CLEAR LOG
+    </button>
+
+    <button
+      class="control"
+      id="wakeButton"
+    >
+      WAKE LUCEN
+    </button>
+
+  </section>
+
+
+  <section class="controls">
+
+    <div class="control">
+
+      VOLUME
+
+      <input
+        class="volume"
+        id="volume"
+        type="range"
+        min="0"
+        max=".6"
+        step=".01"
+        value=".28"
+      >
+
+    </div>
+
+    <button
+      class="control"
+      id="testButton"
+    >
+      SYSTEM TEST
+    </button>
+
+    <button
+      class="control"
+      id="stopVoice"
+    >
+      DISCONNECT VOICE
+    </button>
+
+  </section>
+
 </div>
-<div class="processing" id="processing">
-  <div class="proc-box">
-    <div class="proc-top">
-      <span id="procText">ANALYSING</span>
-      <span id="procPercent">0%</span>
+
+
+<!-- =========================
+     PROCESSING OVERLAY
+========================== -->
+
+<div
+  class="processing"
+  id="processing"
+>
+
+  <div class="processingBox">
+
+    <div class="processingTitle">
+      LUCEN // INTELLIGENCE ENGINE
     </div>
-    <div class="proc-bar">
-      <div class="proc-fill" id="procFill"></div>
+
+    <div
+      class="processingQuery"
+      id="processingQuery"
+    ></div>
+
+    <div class="phaseList">
+
+      <div class="phase" data-phase="0">
+        <span class="phaseDot"></span>
+        QUERY ANALYSIS
+      </div>
+
+      <div class="phase" data-phase="1">
+        <span class="phaseDot"></span>
+        WORLD SEARCH
+      </div>
+
+      <div class="phase" data-phase="2">
+        <span class="phaseDot"></span>
+        SOURCE DISCOVERY
+      </div>
+
+      <div class="phase" data-phase="3">
+        <span class="phaseDot"></span>
+        SOURCE PROCESSING
+      </div>
+
+      <div class="phase" data-phase="4">
+        <span class="phaseDot"></span>
+        CROSS CHECK
+      </div>
+
+      <div class="phase" data-phase="5">
+        <span class="phaseDot"></span>
+        AI SYNTHESIS
+      </div>
+
+      <div class="phase" data-phase="6">
+        <span class="phaseDot"></span>
+        RESPONSE
+      </div>
+
     </div>
+
+    <div class="scanLine">
+      <span></span>
+    </div>
+
   </div>
+
 </div>
-<audio id="remoteAudio" autoplay playsinline></audio>
+
+
+<div class="toast" id="toast"></div>
+
+
 <script>
-"use strict";
-/* =========================================================
-   CONFIG
-========================================================= */
-const API_URL = "/.netlify/functions/lucen-v2";
-const REALTIME_URL = "/.netlify/functions/realtime";
-/* =========================================================
-   DOM
-========================================================= */
-const $ = id => document.getElementById(id);
-const input = $("input");
-const sendBtn = $("sendBtn");
-const voiceBtn = $("voiceBtn");
-const messages = $("messages");
-const hudState = $("hudState");
-const systemStatus = $("systemStatus");
-const statusSub = $("statusSub");
-const processing = $("processing");
-const procText = $("procText");
-const procPercent = $("procPercent");
-const procFill = $("procFill");
-const activityLog = $("activityLog");
-const opCount = $("opCount");
-const searchOverlay = $("searchOverlay");
-const flash = $("flash");
-const tiles = {
-  analysis: $("tileAnalysis"),
-  search: $("tileSearch"),
-  sources: $("tileSources"),
-  process: $("tileProcess"),
-  verify: $("tileVerify"),
-  response: $("tileResponse")
+/* =====================================================
+   LUCEN // CINEMATIC SOUND ENGINE
+===================================================== */
+
+const LUCEN_AUDIO = {
+  ctx:null,
+  master:null,
+  enabled:true,
+  volume:.28,
+  scanTimer:null,
+  scanOsc:null
 };
-const tabs = [
-  $("tab1"),
-  $("tab2"),
-  $("tab3"),
-  $("tab4")
-];
-const targets = [
-  document.querySelector(".t1"),
-  document.querySelector(".t2"),
-  document.querySelector(".t3"),
-  document.querySelector(".t4"),
-  document.querySelector(".t5"),
-  document.querySelector(".t6")
-];
-/* =========================================================
-   STAR FIELD
-========================================================= */
-const starsCanvas = $("stars");
-const starsCtx = starsCanvas.getContext("2d");
-let stars = [];
-function resizeCanvas(canvas, ctx){
-  const dpr = Math.min(window.devicePixelRatio || 1,2);
-  canvas.width = Math.floor(innerWidth*dpr);
-  canvas.height = Math.floor(innerHeight*dpr);
-  canvas.style.width = innerWidth+"px";
-  canvas.style.height = innerHeight+"px";
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-}
-function initStars(){
-  resizeCanvas(starsCanvas,starsCtx);
-  stars = Array.from({
-    length: Math.min(150,Math.floor(innerWidth*0.18))
-  },()=>({
-    x:Math.random()*innerWidth,
-    y:Math.random()*innerHeight,
-    r:Math.random()*1.1,
-    a:Math.random(),
-    s:.002+Math.random()*.008
-  }));
-}
-function drawStars(){
-  starsCtx.clearRect(0,0,innerWidth,innerHeight);
-  for(const s of stars){
-    s.a += s.s;
-    const alpha = .15 + Math.abs(Math.sin(s.a))*.55;
-    starsCtx.beginPath();
-    starsCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    starsCtx.fillStyle=`rgba(110,210,255,${alpha})`;
-    starsCtx.fill();
-  }
-  requestAnimationFrame(drawStars);
-}
-initStars();
-drawStars();
-window.addEventListener("resize",initStars);
-/* =========================================================
-   NETWORK CANVAS
-========================================================= */
-const networkCanvas = $("network");
-const netCtx = networkCanvas.getContext("2d");
-let packets = [];
-let networkActive = false;
-function resizeNetwork(){
-  resizeCanvas(networkCanvas,netCtx);
-}
-resizeNetwork();
-window.addEventListener("resize",resizeNetwork);
-function point(el){
-  const r = el.getBoundingClientRect();
-  return {
-    x:r.left+r.width/2,
-    y:r.top+r.height/2
-  };
-}
-function drawNetwork(){
-  netCtx.clearRect(0,0,innerWidth,innerHeight);
-  if(networkActive){
-    const center = point(document.querySelector(".core"));
-    const activeTargets =
-      targets.filter(t=>t.classList.contains("active"));
-    for(const target of activeTargets){
-      const p = point(target);
-      netCtx.beginPath();
-      netCtx.moveTo(center.x,center.y);
-      netCtx.lineTo(p.x,p.y);
-      netCtx.strokeStyle="rgba(85,234,255,.18)";
-      netCtx.lineWidth=1;
-      netCtx.stroke();
+
+function initLucenAudio(){
+
+  if(LUCEN_AUDIO.ctx){
+
+    if(LUCEN_AUDIO.ctx.state==="suspended"){
+      LUCEN_AUDIO.ctx.resume();
     }
-    for(const p of packets){
-      const target = activeTargets[p.target];
-      if(!target) continue;
-      const t = point(target);
-      const x =
-        center.x+(t.x-center.x)*p.progress;
-      const y =
-        center.y+(t.y-center.y)*p.progress;
-      netCtx.beginPath();
-      netCtx.arc(x,y,2,0,Math.PI*2);
-      netCtx.fillStyle="#55eaff";
-      netCtx.shadowBlur=12;
-      netCtx.shadowColor="#55eaff";
-      netCtx.fill();
-      netCtx.shadowBlur=0;
-      p.progress += .018;
-      if(p.progress>1){
-        p.progress=0;
-        hitSound();
-      }
+
+    return;
+  }
+
+  const AudioContext =
+    window.AudioContext ||
+    window.webkitAudioContext;
+
+  if(!AudioContext)return;
+
+  const ctx=new AudioContext();
+
+  const master=ctx.createGain();
+
+  master.gain.value=LUCEN_AUDIO.volume;
+
+  master.connect(ctx.destination);
+
+  LUCEN_AUDIO.ctx=ctx;
+  LUCEN_AUDIO.master=master;
+}
+
+function tone(
+  frequency,
+  duration=.12,
+  type="sine",
+  volume=.08,
+  delay=0
+){
+
+  if(!LUCEN_AUDIO.enabled)return;
+
+  initLucenAudio();
+
+  const ctx=LUCEN_AUDIO.ctx;
+  const master=LUCEN_AUDIO.master;
+
+  if(!ctx||!master)return;
+
+  const start=ctx.currentTime+delay;
+
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+
+  osc.type=type;
+
+  osc.frequency.setValueAtTime(
+    frequency,
+    start
+  );
+
+  gain.gain.setValueAtTime(
+    0,
+    start
+  );
+
+  gain.gain.linearRampToValueAtTime(
+    volume,
+    start+.015
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    .001,
+    start+duration
+  );
+
+  osc.connect(gain);
+  gain.connect(master);
+
+  osc.start(start);
+  osc.stop(start+duration+.03);
+}
+
+function soundBoot(){
+
+  initLucenAudio();
+
+  tone(110,.22,"sine",.05);
+  tone(220,.28,"sine",.055,.08);
+  tone(440,.35,"sine",.045,.18);
+  tone(880,.16,"triangle",.035,.30);
+}
+
+function soundReady(){
+
+  tone(440,.10,"sine",.04);
+  tone(660,.12,"sine",.045,.07);
+  tone(990,.20,"sine",.035,.15);
+}
+
+function soundSearchStart(){
+
+  tone(180,.18,"sawtooth",.035);
+
+  tone(
+    360,
+    .22,
+    "triangle",
+    .04,
+    .08
+  );
+
+  tone(
+    720,
+    .30,
+    "sine",
+    .035,
+    .16
+  );
+}
+
+function soundSourceFound(){
+
+  tone(620,.08,"triangle",.055);
+  tone(930,.13,"sine",.045,.055);
+  tone(1240,.20,"sine",.025,.11);
+}
+
+function soundAnalysis(){
+
+  tone(120,.18,"sawtooth",.025);
+  tone(240,.18,"triangle",.025,.07);
+  tone(480,.18,"triangle",.025,.14);
+  tone(960,.25,"sine",.022,.21);
+}
+
+function soundCrossCheck(){
+
+  tone(300,.06,"square",.025);
+  tone(450,.06,"square",.025,.07);
+  tone(600,.06,"square",.025,.14);
+  tone(900,.14,"triangle",.035,.21);
+}
+
+function soundComplete(){
+
+  tone(330,.10,"sine",.04);
+  tone(495,.11,"sine",.045,.08);
+  tone(660,.15,"sine",.05,.16);
+  tone(990,.30,"triangle",.04,.25);
+}
+
+function soundError(){
+
+  tone(180,.16,"square",.045);
+  tone(120,.25,"square",.04,.13);
+}
+
+function soundVoice(){
+
+  tone(250,.10,"sine",.035);
+  tone(500,.14,"triangle",.045,.07);
+  tone(1000,.25,"sine",.035,.15);
+}
+
+function startScanSound(){
+
+  if(!LUCEN_AUDIO.enabled)return;
+
+  stopScanSound();
+  initLucenAudio();
+
+  const ctx=LUCEN_AUDIO.ctx;
+  const master=LUCEN_AUDIO.master;
+
+  if(!ctx||!master)return;
+
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+
+  osc.type="triangle";
+  osc.frequency.value=90;
+
+  gain.gain.value=.012;
+
+  osc.connect(gain);
+  gain.connect(master);
+
+  osc.start();
+
+  LUCEN_AUDIO.scanOsc=osc;
+
+  LUCEN_AUDIO.scanTimer=setInterval(()=>{
+
+    if(!LUCEN_AUDIO.enabled)return;
+
+    const now=ctx.currentTime;
+
+    osc.frequency.cancelScheduledValues(now);
+
+    osc.frequency.setValueAtTime(90,now);
+
+    osc.frequency.exponentialRampToValueAtTime(
+      700,
+      now+.45
+    );
+
+    osc.frequency.exponentialRampToValueAtTime(
+      110,
+      now+.9
+    );
+
+  },900);
+}
+
+function stopScanSound(){
+
+  if(LUCEN_AUDIO.scanTimer){
+
+    clearInterval(
+      LUCEN_AUDIO.scanTimer
+    );
+
+    LUCEN_AUDIO.scanTimer=null;
+  }
+
+  if(LUCEN_AUDIO.scanOsc){
+
+    try{
+      LUCEN_AUDIO.scanOsc.stop();
+    }catch{}
+
+    LUCEN_AUDIO.scanOsc=null;
+  }
+}
+
+function toggleLucenSound(){
+
+  LUCEN_AUDIO.enabled=
+    !LUCEN_AUDIO.enabled;
+
+  if(!LUCEN_AUDIO.enabled){
+
+    stopScanSound();
+
+  }else{
+
+    initLucenAudio();
+    soundReady();
+  }
+
+  updateSoundUI();
+}
+
+function setLucenVolume(value){
+
+  LUCEN_AUDIO.volume=Number(value);
+
+  initLucenAudio();
+
+  if(LUCEN_AUDIO.master){
+
+    LUCEN_AUDIO.master.gain.value=
+      LUCEN_AUDIO.volume;
+  }
+}
+
+function updateSoundUI(){
+
+  const button=
+    document.getElementById(
+      "lucenSoundButton"
+    );
+
+  if(!button)return;
+
+  button.textContent=
+    LUCEN_AUDIO.enabled
+      ? "🔊 SOUND ON"
+      : "🔇 SOUND OFF";
+}
+
+document.addEventListener(
+  "touchstart",
+  ()=>{
+    if(!LUCEN_AUDIO.ctx)return;
+
+    if(
+      LUCEN_AUDIO.ctx.state==="suspended"
+    ){
+      LUCEN_AUDIO.ctx.resume();
     }
-  }
-  requestAnimationFrame(drawNetwork);
-}
-drawNetwork();
-/* =========================================================
-   AUDIO ENGINE
-========================================================= */
-let audioCtx = null;
-function unlockAudio(){
-  if(!audioCtx){
-    audioCtx =
-      new (window.AudioContext ||
-           window.webkitAudioContext)();
-  }
-  if(audioCtx.state==="suspended"){
-    audioCtx.resume().catch(()=>{});
-  }
-}
-document.addEventListener("touchstart",unlockAudio,{once:true});
-document.addEventListener("click",unlockAudio,{once:true});
-function tone(freq,duration=.08,type="sine",volume=.025){
-  try{
-    unlockAudio();
-    const osc=audioCtx.createOscillator();
-    const gain=audioCtx.createGain();
-    osc.type=type;
-    osc.frequency.value=freq;
-    gain.gain.setValueAtTime(0.0001,audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-      volume,
-      audioCtx.currentTime+.01
-    );
-    gain.gain.exponentialRampToValueAtTime(
-      .0001,
-      audioCtx.currentTime+duration
-    );
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime+duration+.02);
-  }catch{}
-}
-function searchStartSound(){
-  tone(180,.12,"sine",.03);
-  setTimeout(()=>tone(320,.12,"sine",.025),80);
-  setTimeout(()=>tone(540,.16,"sine",.02),160);
-}
-function hitSound(){
-  tone(850,.055,"triangle",.035);
-  setTimeout(
-    ()=>tone(1200,.07,"sine",.02),
-    35
-  );
-}
-function tabSound(){
-  tone(500,.06,"square",.018);
-  setTimeout(
-    ()=>tone(760,.08,"sine",.014),
-    50
-  );
-}
-function completeSound(){
-  tone(500,.1,"sine",.025);
-  setTimeout(
-    ()=>tone(700,.1,"sine",.025),
-    100
-  );
-  setTimeout(
-    ()=>tone(980,.18,"sine",.03),
-    200
-  );
-}
-function errorSound(){
-  tone(180,.18,"sawtooth",.025);
-}
-/* =========================================================
-   UI HELPERS
-========================================================= */
-function addMessage(text,type="ai"){
-  const el=document.createElement("div");
-  el.className=`msg ${type}`;
-  el.textContent=text;
-  messages.appendChild(el);
-  while(messages.children.length>80){
-    messages.removeChild(messages.firstChild);
-  }
-  messages.scrollTop=messages.scrollHeight;
-}
-function log(text,type=""){
-  const el=document.createElement("div");
-  el.className="log-line";
-  const time =
-    new Date().toLocaleTimeString(
+  },
+  {passive:true}
+);
+
+
+/* =====================================================
+   LUCEN // GLOBAL STATE
+===================================================== */
+
+const state={
+
+  searching:false,
+
+  voice:false,
+
+  currentQuery:"",
+
+  lastSources:[],
+
+  currentTab:"sources",
+
+  phase:0,
+
+  pc:null,
+
+  dc:null,
+
+  audioEl:null,
+
+  searchTimer:null,
+
+  mapTimer:null,
+
+  messageId:0
+
+};
+
+
+/* =====================================================
+   DOM
+===================================================== */
+
+const $=id=>document.getElementById(id);
+
+const queryInput=$("query");
+const chatText=$("chatText");
+const messages=$("messages");
+const sourceContent=$("sourceContent");
+const activityLog=$("activityLog");
+const processing=$("processing");
+const processingQuery=$("processingQuery");
+const core=$("core");
+const coreState=$("coreState");
+const systemStatus=$("systemStatus");
+const researchStatus=$("researchStatus");
+const connectionState=$("connectionState");
+const voiceStatus=$("voiceStatus");
+
+
+/* =====================================================
+   CLOCK
+===================================================== */
+
+function updateClock(){
+
+  const now=new Date();
+
+  $("clock").textContent=
+    now.toLocaleTimeString(
       "de-DE",
       {
         hour:"2-digit",
@@ -983,534 +2135,2043 @@ function log(text,type=""){
         second:"2-digit"
       }
     );
-  el.innerHTML=
-    `<span>${time}</span> <b>${type||"LUCEN"}</b> ${escapeHtml(text)}`;
-  activityLog.appendChild(el);
-  while(activityLog.children.length>18){
-    activityLog.removeChild(activityLog.firstChild);
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+
+/* =====================================================
+   STAR FIELD
+===================================================== */
+
+const starsCanvas=$("stars");
+const starsCtx=starsCanvas.getContext("2d");
+
+let stars=[];
+
+function resizeStars(){
+
+  starsCanvas.width=innerWidth;
+  starsCanvas.height=innerHeight;
+
+  stars=[];
+
+  const count=
+    Math.min(
+      170,
+      Math.floor(
+        innerWidth*innerHeight/7000
+      )
+    );
+
+  for(let i=0;i<count;i++){
+
+    stars.push({
+
+      x:Math.random()*innerWidth,
+      y:Math.random()*innerHeight,
+
+      r:Math.random()*1.2+.15,
+
+      a:Math.random()*.7+.15,
+
+      s:Math.random()*.004+.001
+
+    });
   }
 }
-function escapeHtml(value){
-  return String(value)
+
+function drawStars(){
+
+  starsCtx.clearRect(
+    0,
+    0,
+    starsCanvas.width,
+    starsCanvas.height
+  );
+
+  for(const s of stars){
+
+    s.a+=s.s;
+
+    if(s.a>.9||s.a<.1){
+      s.s*=-1;
+    }
+
+    starsCtx.globalAlpha=s.a;
+
+    starsCtx.fillStyle="#70dbe5";
+
+    starsCtx.beginPath();
+
+    starsCtx.arc(
+      s.x,
+      s.y,
+      s.r,
+      0,
+      Math.PI*2
+    );
+
+    starsCtx.fill();
+  }
+
+  requestAnimationFrame(drawStars);
+}
+
+resizeStars();
+addEventListener("resize",resizeStars);
+drawStars();
+
+
+/* =====================================================
+   GRID
+===================================================== */
+
+const gridCanvas=$("grid");
+const gridCtx=gridCanvas.getContext("2d");
+
+function drawGrid(){
+
+  gridCanvas.width=innerWidth;
+  gridCanvas.height=innerHeight;
+
+  const size=70;
+
+  gridCtx.strokeStyle=
+    "rgba(0,234,255,.025)";
+
+  gridCtx.lineWidth=1;
+
+  for(
+    let x=0;
+    x<innerWidth;
+    x+=size
+  ){
+
+    gridCtx.beginPath();
+    gridCtx.moveTo(x,0);
+    gridCtx.lineTo(x,innerHeight);
+    gridCtx.stroke();
+  }
+
+  for(
+    let y=0;
+    y<innerHeight;
+    y+=size
+  ){
+
+    gridCtx.beginPath();
+    gridCtx.moveTo(0,y);
+    gridCtx.lineTo(innerWidth,y);
+    gridCtx.stroke();
+  }
+}
+
+drawGrid();
+addEventListener("resize",drawGrid);
+
+
+/* =====================================================
+   LOGGING
+===================================================== */
+
+function log(
+  text,
+  type=""
+){
+
+  const row=
+    document.createElement("div");
+
+  row.className=
+    "log "+type;
+
+  const time=
+    new Date()
+      .toLocaleTimeString(
+        "de-DE",
+        {
+          hour:"2-digit",
+          minute:"2-digit",
+          second:"2-digit"
+        }
+      );
+
+  row.innerHTML=
+    `<span class="time">[${time}]</span> ${escapeHTML(text)}`;
+
+  activityLog.appendChild(row);
+
+  activityLog.scrollTop=
+    activityLog.scrollHeight;
+}
+
+function escapeHTML(value){
+
+  return String(value??"")
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
 }
-function setTile(name,status,mode="active"){
-  const tile=tiles[name];
-  if(!tile)return;
-  tile.classList.remove("active","done");
-  if(mode==="active"){
-    tile.classList.add("active");
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+let toastTimer=null;
+
+function toast(text){
+
+  const t=$("toast");
+
+  t.textContent=text;
+  t.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer=setTimeout(
+    ()=>t.classList.remove("show"),
+    2500
+  );
+}
+
+
+/* =====================================================
+   OPERATIONS
+===================================================== */
+
+const opMap={
+
+  network:$("opNetwork"),
+  sources:$("opSources"),
+  process:$("opProcess"),
+  cross:$("opCross"),
+  ai:$("opAI")
+
+};
+
+function opStart(name){
+
+  const op=opMap[name];
+
+  if(!op)return;
+
+  op.classList.add("active");
+
+  const stateEl=
+    op.querySelector(".opState");
+
+  const bar=
+    op.querySelector(".opBar span");
+
+  stateEl.textContent="ACTIVE";
+
+  bar.style.width=
+    (20+Math.random()*60)+"%";
+}
+
+function opDone(name){
+
+  const op=opMap[name];
+
+  if(!op)return;
+
+  op.classList.remove("active");
+
+  const stateEl=
+    op.querySelector(".opState");
+
+  const bar=
+    op.querySelector(".opBar span");
+
+  stateEl.textContent="DONE";
+
+  bar.style.width="100%";
+}
+
+function opReset(){
+
+  Object.values(opMap).forEach(op=>{
+
+    op.classList.remove("active");
+
+    op.querySelector(".opState")
+      .textContent="IDLE";
+
+    op.querySelector(".opBar span")
+      .style.width="0%";
+  });
+
+  $("opSecure")
+    .querySelector(".opState")
+    .textContent="SECURE";
+}
+
+
+/* =====================================================
+   TARGET ANIMATION
+===================================================== */
+
+const targets=
+  [...document.querySelectorAll(".target")];
+
+function scanTargets(){
+
+  targets.forEach(t=>
+    t.classList.remove("scanning")
+  );
+
+  let index=0;
+
+  clearInterval(state.mapTimer);
+
+  state.mapTimer=
+    setInterval(()=>{
+
+      targets.forEach(t=>
+        t.classList.remove("scanning")
+      );
+
+      targets[index%targets.length]
+        .classList.add("scanning");
+
+      index++;
+
+    },420);
+}
+
+function stopTargets(){
+
+  clearInterval(state.mapTimer);
+
+  targets.forEach(t=>
+    t.classList.remove("scanning")
+  );
+}
+
+
+/* =====================================================
+   MAP
+===================================================== */
+
+function mapScan(){
+
+  const points=
+    [...document.querySelectorAll(".mapPoint")];
+
+  points.forEach(p=>
+    p.classList.remove("active")
+  );
+
+  let i=0;
+
+  const timer=setInterval(()=>{
+
+    if(i>=points.length){
+
+      clearInterval(timer);
+      return;
+    }
+
+    points[i].classList.add("active");
+    i++;
+
+  },130);
+
+  return timer;
+}
+
+
+/* =====================================================
+   PROCESSING
+===================================================== */
+
+function resetPhases(){
+
+  document
+    .querySelectorAll(".phase")
+    .forEach(p=>{
+      p.classList.remove("active","done");
+    });
+
+  state.phase=0;
+}
+
+function phaseActive(index){
+
+  const phases=
+    [...document.querySelectorAll(".phase")];
+
+  phases.forEach((p,i)=>{
+
+    if(i<index){
+      p.classList.remove("active");
+      p.classList.add("done");
+    }
+
+    if(i===index){
+      p.classList.add("active");
+      p.classList.remove("done");
+    }
+
+  });
+
+  state.phase=index;
+}
+
+function phaseComplete(){
+
+  const phases=
+    [...document.querySelectorAll(".phase")];
+
+  if(phases[state.phase]){
+
+    phases[state.phase]
+      .classList.remove("active");
+
+    phases[state.phase]
+      .classList.add("done");
   }
-  if(mode==="done"){
-    tile.classList.add("done");
-  }
-  const statusEl=tile.querySelector(".tile-status");
-  if(statusEl){
-    statusEl.textContent=status;
-  }
 }
-function setProgress(percent,text){
-  percent=Math.max(0,Math.min(100,percent));
-  procPercent.textContent=Math.round(percent)+"%";
-  procFill.style.width=percent+"%";
-  procText.textContent=text;
-}
-function showProcessing(){
-  processing.classList.add("active");
-}
-function hideProcessing(){
-  processing.classList.remove("active");
-}
-function screenFlash(){
-  flash.classList.remove("hit");
-  void flash.offsetWidth;
-  flash.classList.add("hit");
-}
-/* =========================================================
-   SEARCH DETECTION
-========================================================= */
-function isSearchRequest(text){
+
+
+/* =====================================================
+   SEARCH MODE
+===================================================== */
+
+function shouldSearch(text){
+
+  const q=text.toLowerCase();
+
   const words=[
+
     "suche",
-    "such",
-    "internet",
-    "web",
-    "recherche",
-    "recherchiere",
+    "recherch",
     "aktuell",
-    "aktuelle",
-    "aktuellen",
     "heute",
-    "heutige",
-    "jetzt",
-    "nachrichten",
+    "morgen",
+    "neueste",
     "news",
+    "nachrichten",
     "preis",
     "preise",
+    "kosten",
     "wetter",
     "öffnungszeiten",
-    "quelle",
-    "quellen"
+    "stelle",
+    "job",
+    "jobs",
+    "gehalt",
+    "lohn",
+    "schweiz",
+    "deutschland",
+    "vergleich",
+    "aktuelle",
+    "latest",
+    "update",
+    "information",
+    "infos",
+    "wer",
+    "was kostet",
+    "wo",
+    "wann"
+
   ];
-  const lower=text.toLowerCase();
-  return words.some(w=>lower.includes(w));
+
+  return words.some(w=>q.includes(w));
 }
-/* =========================================================
-   JARVIS SEARCH SEQUENCE
-========================================================= */
-let searchTimers=[];
-function clearSearchTimers(){
-  searchTimers.forEach(clearTimeout);
-  searchTimers=[];
-}
-function later(fn,ms){
-  const id=setTimeout(fn,ms);
-  searchTimers.push(id);
-}
-async function startSearchSequence(query){
-  clearSearchTimers();
-  networkActive=true;
-  searchOverlay.classList.add("active");
-  hudState.textContent="SEARCHING";
-  systemStatus.firstChild.textContent="SEARCH ACTIVE";
-  statusSub.textContent="GLOBAL NETWORK";
-  showProcessing();
-  setProgress(2,"INITIALISING SEARCH");
-  opCount.textContent="01";
-  log("Recherche initialisiert","CORE");
-  setTile("analysis","QUERY ANALYSIS","active");
-  searchStartSound();
-  later(()=>{
-    setProgress(9,"PARSING QUERY");
-    log("Suchanfrage wird analysiert","AI");
-    setTile("analysis","QUERY PARSED","done");
-    setTile("search","CONNECTING","active");
-  },450);
-  later(()=>{
-    setProgress(17,"CONNECTING NETWORK");
-    log("Globale Suchknoten werden verbunden","NET");
-  },850);
-  later(()=>{
-    targets.forEach((t,i)=>{
-      if(i<3)t.classList.add("active");
-    });
-    packets=[
-      {target:0,progress:0},
-      {target:1,progress:.3},
-      {target:2,progress:.65}
-    ];
-    setProgress(27,"SCANNING SOURCES");
-    log("Erste Suchknoten gefunden","NET");
-    setTile("search","SCANNING","active");
-    hitSound();
-    screenFlash();
-  },1200);
-  later(()=>{
-    tabs[0].textContent="SOURCE 01 · SEARCH";
-    tabs[0].classList.add("open","live");
-    tabSound();
-    setProgress(35,"SOURCE 01");
-    log("Recherchequelle 01 geöffnet","WEB");
-    setTile("sources","SOURCE 01","active");
-  },1600);
-  later(()=>{
-    targets[3].classList.add("active");
-    packets.push({
-      target:3,
-      progress:.05
-    });
-    tabs[1].textContent="SOURCE 02 · SEARCH";
-    tabs[1].classList.add("open","live");
-    setProgress(44,"SOURCE 02");
-    log("Recherchequelle 02 geöffnet","WEB");
-    tabSound();
-  },2050);
-  later(()=>{
-    targets[4].classList.add("active");
-    packets.push({
-      target:4,
-      progress:.4
-    });
-    tabs[0].classList.remove("live");
-    tabs[0].classList.add("done");
-    tabs[2].textContent="SOURCE 03 · SEARCH";
-    tabs[2].classList.add("open","live");
-    setProgress(53,"SOURCE 03");
-    log("Weitere Datenquelle gefunden","WEB");
-    hitSound();
-  },2550);
-  later(()=>{
-    targets[5].classList.add("active");
-    packets.push({
-      target:5,
-      progress:.15
-    });
-    tabs[1].classList.remove("live");
-    tabs[1].classList.add("done");
-    tabs[3].textContent="SOURCE 04 · SEARCH";
-    tabs[3].classList.add("open","live");
-    setProgress(61,"SOURCE 04");
-    log("Zusätzliche Quelle verbunden","WEB");
-    tabSound();
-  },3000);
-  later(()=>{
-    setProgress(69,"EXTRACTING DATA");
-    log("Daten werden extrahiert","DATA");
-    setTile("search","SEARCH COMPLETE","done");
-    setTile("sources","EXTRACTING","active");
-    setTile("process","PROCESSING","active");
-  },3500);
-  later(()=>{
-    tabs[2].classList.remove("live");
-    tabs[2].classList.add("done");
-    setProgress(76,"CROSS CHECK");
-    log("Quellen werden abgeglichen","VERIFY");
-    setTile("sources","SOURCES VERIFIED","done");
-    setTile("verify","CROSS CHECK","active");
-  },4050);
-  later(()=>{
-    tabs[3].classList.remove("live");
-    tabs[3].classList.add("done");
-    setProgress(84,"AI SYNTHESIS");
-    log("Informationen werden zusammengeführt","AI");
-    setTile("process","AI SYNTHESIS","active");
-  },4550);
-  later(()=>{
-    setProgress(91,"GENERATING RESPONSE");
-    log("Antwort wird generiert","CORE");
-    setTile("verify","VERIFIED","done");
-    setTile("response","GENERATING","active");
-  },5100);
-  later(()=>{
-    setProgress(97,"FINALISING");
-    log("Recherche abgeschlossen","SYSTEM");
-  },5600);
-}
-function finishSearchSequence(success=true){
-  clearSearchTimers();
-  if(success){
-    setProgress(100,"COMPLETE");
-    hudState.textContent="COMPLETE";
-    statusSub.textContent="SEARCH COMPLETE";
-    setTile("response","COMPLETE","done");
-    log("Analyse abgeschlossen","LUCEN");
-    completeSound();
-    screenFlash();
-  }else{
-    hudState.textContent="ERROR";
-    statusSub.textContent="SEARCH ERROR";
-    errorSound();
-    log("Recherchefehler","ERROR");
-  }
-  later(()=>{
-    networkActive=false;
-    searchOverlay.classList.remove("active");
-    if(success){
-      targets.forEach(t=>t.classList.remove("active"));
-      tabs.forEach(t=>{
-        t.classList.remove("open","live","done");
-      });
-      hudState.textContent="STANDBY";
-      systemStatus.firstChild.textContent="ONLINE";
-      statusSub.textContent="AI CORE READY";
-    }
-    hideProcessing();
-  },900);
-}
-/* =========================================================
-   BACKEND CHAT / WEB SEARCH
-========================================================= */
-let requestBusy=false;
-async function sendMessage(text){
-  text=String(text||"").trim();
-  if(!text || requestBusy)return;
-  requestBusy=true;
-  sendBtn.disabled=true;
-  input.disabled=true;
-  addMessage(text,"user");
-  const searching=isSearchRequest(text);
-  if(searching){
-    startSearchSequence(text);
-  }else{
-    hudState.textContent="THINKING";
-    systemStatus.firstChild.textContent="PROCESSING";
-    statusSub.textContent="AI CORE";
-    showProcessing();
-    setProgress(20,"ANALYSING");
-    setTile("analysis","PROCESSING","active");
-    log("Anfrage empfangen","CORE");
-  }
+
+
+/* =====================================================
+   BACKEND
+===================================================== */
+
+async function callLucen(text){
+
+  const response=
+    await fetch(
+      "/.netlify/functions/lucen-v2",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+        body:JSON.stringify({
+          message:text,
+          query:text,
+          language:"de"
+        })
+      }
+    );
+
+  const raw=
+    await response.text();
+
+  let data;
+
   try{
-    const response=await fetch(API_URL,{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        message:text
-      })
-    });
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok || data?.ok===false){
-      throw new Error(
-        data?.error ||
-        data?.reply ||
-        `HTTP ${response.status}`
-      );
-    }
-    const reply=
-      data?.reply ||
-      data?.output ||
-      data?.message ||
-      "Verstanden.";
-    if(!searching){
-      setProgress(55,"AI PROCESSING");
-      setTile("analysis","ANALYSED","done");
-      setTile("process","GENERATING","active");
-      log("Antwort verarbeitet","AI");
-      await wait(220);
-      setProgress(100,"COMPLETE");
-      setTile("process","COMPLETE","done");
-      hudState.textContent="STANDBY";
-      systemStatus.firstChild.textContent="ONLINE";
-      statusSub.textContent="AI CORE READY";
-      hideProcessing();
-    }
-    addMessage(reply,"ai");
-    if(searching){
-      setTile("response","RESPONSE READY","done");
-      finishSearchSequence(true);
-    }
-  }catch(error){
-    console.error(error);
-    addMessage(
-      "Ich konnte die Anfrage gerade nicht verarbeiten.",
-      "ai"
+    data=JSON.parse(raw);
+  }catch{
+
+    throw new Error(
+      "Ungültige Serverantwort."
     );
-    log(
-      error?.message || "Unbekannter Fehler",
-      "ERROR"
+  }
+
+  if(!response.ok){
+
+    throw new Error(
+      data.error ||
+      data.details ||
+      "LUCEN Backend Fehler"
     );
-    if(searching){
-      finishSearchSequence(false);
-    }else{
-      errorSound();
-      hudState.textContent="ERROR";
-      systemStatus.firstChild.textContent="ERROR";
-      statusSub.textContent="CONNECTION";
-      hideProcessing();
-      later(()=>{
-        hudState.textContent="STANDBY";
-        systemStatus.firstChild.textContent="ONLINE";
-        statusSub.textContent="AI CORE READY";
-      },1200);
-    }
-  }finally{
-    requestBusy=false;
-    sendBtn.disabled=false;
-    input.disabled=false;
-    input.focus();
   }
+
+  return data;
 }
-function wait(ms){
-  return new Promise(resolve=>setTimeout(resolve,ms));
-}
-/* =========================================================
-   SEND EVENTS
-========================================================= */
-sendBtn.addEventListener("click",()=>{
-  unlockAudio();
-  const text=input.value.trim();
-  if(!text)return;
-  input.value="";
-  sendMessage(text);
-});
-input.addEventListener("keydown",event=>{
-  if(event.key==="Enter"){
-    event.preventDefault();
-    sendBtn.click();
-  }
-});
-/* =========================================================
-   VOICE — EXISTING REALTIME ENDPOINT
-   realtime.js bleibt unverändert
-========================================================= */
-let pc=null;
-let dc=null;
-let localStream=null;
-let voiceRunning=false;
-async function startVoice(){
-  if(voiceRunning){
-    stopVoice();
+
+
+/* =====================================================
+   RESEARCH RENDER
+===================================================== */
+
+function renderSources(sources){
+
+  state.lastSources=
+    Array.isArray(sources)
+      ? sources
+      : [];
+
+  if(!state.lastSources.length){
+
+    sourceContent.innerHTML=`
+
+      <div class="emptyState">
+
+        <div class="emptyIcon">⌁</div>
+
+        <div class="emptyText">
+          KEINE QUELLEN GELIEFERT
+        </div>
+
+      </div>
+
+    `;
+
     return;
   }
-  unlockAudio();
+
+  sourceContent.innerHTML=`
+
+    <div class="sources">
+
+      ${state.lastSources.map(
+        (source,index)=>{
+
+          const title=
+            source.title ||
+            source.url ||
+            "Unbekannte Quelle";
+
+          const domain=
+            source.domain ||
+            getDomain(source.url);
+
+          const snippet=
+            source.snippet ||
+            "Keine Vorschau verfügbar.";
+
+          const url=
+            source.url || "#";
+
+          return `
+
+            <article
+              class="source"
+              style="animation-delay:${index*55}ms"
+            >
+
+              <div class="sourceTop">
+
+                <span class="sourceDomain">
+                  ${escapeHTML(domain)}
+                </span>
+
+                <span class="sourceNo">
+                  SRC-${String(index+1).padStart(2,"0")}
+                </span>
+
+              </div>
+
+              <div class="sourceTitle">
+                ${escapeHTML(title)}
+              </div>
+
+              <div class="sourceSnippet">
+                ${escapeHTML(snippet)}
+              </div>
+
+              <div class="sourceBottom">
+
+                <span class="sourceState">
+                  ● VERIFIED NODE
+                </span>
+
+                ${
+                  url!=="#"
+                  ?
+                  `<a
+                    class="openSource"
+                    href="${escapeAttribute(url)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >OPEN ↗</a>`
+                  :
+                  ""
+                }
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
+      ).join("")}
+
+    </div>
+
+  `;
+}
+
+function getDomain(url){
+
   try{
-    voiceBtn.classList.add("active");
-    hudState.textContent="VOICE";
-    systemStatus.firstChild.textContent="VOICE ACTIVE";
-    statusSub.textContent="LISTENING";
-    log("Voice-Verbindung wird aufgebaut","VOICE");
-    localStream=
-      await navigator.mediaDevices.getUserMedia({
-        audio:true
-      });
-    pc=new RTCPeerConnection();
-    pc.ontrack=event=>{
-      const audio=$("remoteAudio");
-      audio.srcObject=event.streams[0];
-      audio.play().catch(()=>{});
-    };
-    pc.onconnectionstatechange=()=>{
-      const state=pc.connectionState;
-      log(
-        "WebRTC: "+state.toUpperCase(),
-        "VOICE"
+    return new URL(url).hostname;
+  }catch{
+    return "WEB SOURCE";
+  }
+}
+
+function escapeAttribute(value){
+
+  return String(value??"")
+    .replaceAll("&","&amp;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+
+/* =====================================================
+   ANALYSIS TAB
+===================================================== */
+
+function renderAnalysis(data){
+
+  const phases=
+    data?.analysis || [];
+
+  sourceContent.innerHTML=`
+
+    <div style="
+      display:grid;
+      gap:8px;
+    ">
+
+      ${
+        phases.length
+        ?
+        phases.map((p,i)=>`
+
+          <div class="source">
+
+            <div class="sourceTop">
+
+              <span class="sourceDomain">
+                PHASE ${String(i+1).padStart(2,"0")}
+              </span>
+
+              <span class="sourceNo">
+                COMPLETE
+              </span>
+
+            </div>
+
+            <div class="sourceTitle">
+              ${escapeHTML(
+                typeof p==="string"
+                ?p
+                :p.phase||p.title||"PROCESS"
+              )}
+            </div>
+
+            <div class="sourceSnippet">
+
+              ${
+                typeof p==="string"
+                ? "LUCEN processing pipeline."
+                : escapeHTML(
+                    p.detail ||
+                    p.status ||
+                    "Processing complete."
+                  )
+              }
+
+            </div>
+
+          </div>
+
+        `).join("")
+        :
+        `
+
+          <div class="emptyState">
+            <div class="emptyIcon">◌</div>
+            <div class="emptyText">
+              ANALYSIS DATA WAITING
+            </div>
+          </div>
+
+        `
+      }
+
+    </div>
+
+  `;
+}
+
+
+/* =====================================================
+   CROSS CHECK
+===================================================== */
+
+function renderCrossCheck(){
+
+  const sources=state.lastSources;
+
+  const count=sources.length;
+
+  sourceContent.innerHTML=`
+
+    <div class="sources">
+
+      <div class="source">
+
+        <div class="sourceTop">
+          <span class="sourceDomain">
+            SOURCE MATRIX
+          </span>
+          <span class="sourceNo">
+            ${count}
+          </span>
+        </div>
+
+        <div class="sourceTitle">
+          ${count} Quellen verarbeitet
+        </div>
+
+        <div class="sourceSnippet">
+          LUCEN hat die verfügbaren Quellen
+          gesammelt und für die Antwort
+          berücksichtigt.
+        </div>
+
+        <div class="sourceBottom">
+          <span class="sourceState">
+            ● MATRIX COMPLETE
+          </span>
+        </div>
+
+      </div>
+
+
+      <div class="source">
+
+        <div class="sourceTop">
+          <span class="sourceDomain">
+            CONSISTENCY
+          </span>
+          <span class="sourceNo">
+            AI
+          </span>
+        </div>
+
+        <div class="sourceTitle">
+          Informationen werden abgeglichen
+        </div>
+
+        <div class="sourceSnippet">
+          Widersprüchliche oder unvollständige
+          Informationen werden bei der
+          Synthese berücksichtigt.
+        </div>
+
+        <div class="sourceBottom">
+          <span class="sourceState">
+            ● CROSS-CHECK READY
+          </span>
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+}
+
+
+/* =====================================================
+   SYNTHESIS
+===================================================== */
+
+function renderSynthesis(reply){
+
+  sourceContent.innerHTML=`
+
+    <div class="source">
+
+      <div class="sourceTop">
+
+        <span class="sourceDomain">
+          LUCEN SYNTHESIS
+        </span>
+
+        <span class="sourceNo">
+          FINAL
+        </span>
+
+      </div>
+
+      <div class="sourceTitle">
+        Ergebnis
+      </div>
+
+      <div
+        class="sourceSnippet"
+        style="
+          font-size:11px;
+          line-height:1.6;
+          color:#b6dce1;
+        "
+      >
+        ${formatReply(reply)}
+      </div>
+
+      <div class="sourceBottom">
+
+        <span class="sourceState">
+          ● SYNTHESIS COMPLETE
+        </span>
+
+      </div>
+
+    </div>
+
+  `;
+}
+
+function formatReply(text){
+
+  return escapeHTML(text)
+    .replace(/\n/g,"<br>")
+    .replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>");
+}
+
+
+/* =====================================================
+   CHAT
+===================================================== */
+
+function addMessage(
+  text,
+  type="ai"
+){
+
+  const message=
+    document.createElement("div");
+
+  message.className=
+    "message "+type;
+
+  const label=
+    type==="ai"
+      ? "LUCEN"
+      : "USER";
+
+  message.innerHTML=`
+
+    <div class="messageLabel">
+      ${label}
+    </div>
+
+    <div>
+      ${formatReply(text)}
+    </div>
+
+  `;
+
+  messages.appendChild(message);
+
+  messages.scrollTop=
+    messages.scrollHeight;
+}
+
+
+/* =====================================================
+   SEARCH SEQUENCE
+===================================================== */
+
+async function search(query){
+
+  query=query.trim();
+
+  if(!query)return;
+
+  if(state.searching){
+
+    toast("LUCEN arbeitet bereits.");
+
+    return;
+  }
+
+  state.searching=true;
+  state.currentQuery=query;
+
+  initLucenAudio();
+
+  soundSearchStart();
+  startScanSound();
+
+  core.classList.add("active");
+
+  coreState.textContent="PROCESSING";
+
+  systemStatus.textContent=
+    "INTELLIGENCE ACTIVE";
+
+  researchStatus.textContent=
+    "ANALYSING";
+
+  connectionState.textContent=
+    "NET::CONNECTING";
+
+  processingQuery.textContent=
+    query;
+
+  processing.classList.add("show");
+
+  resetPhases();
+
+  opReset();
+
+  scanTargets();
+
+  mapScan();
+
+  log(
+    "New intelligence request: "+
+    query,
+    "info"
+  );
+
+  phaseActive(0);
+  opStart("ai");
+
+  await wait(420);
+
+  phaseComplete();
+  phaseActive(1);
+
+  opStart("network");
+
+  log(
+    "Query analysis complete.",
+    "good"
+  );
+
+  await wait(380);
+
+  phaseComplete();
+  phaseActive(2);
+
+  opDone("network");
+  opStart("sources");
+
+  researchStatus.textContent=
+    "SEARCHING";
+
+  connectionState.textContent=
+    "NET::SEARCH";
+
+  soundSourceFound();
+
+  log(
+    "External research pipeline initiated.",
+    "info"
+  );
+
+  await wait(500);
+
+  phaseComplete();
+  phaseActive(3);
+
+  opStart("process");
+
+  researchStatus.textContent=
+    "PROCESSING SOURCES";
+
+  soundAnalysis();
+
+  log(
+    "Source processing active.",
+    "info"
+  );
+
+  let result=null;
+
+  try{
+
+    result=
+      await callLucen(query);
+
+  }catch(error){
+
+    console.error(error);
+
+    stopScanSound();
+    soundError();
+
+    processing.classList.remove("show");
+
+    core.classList.remove("active");
+
+    coreState.textContent="ERROR";
+
+    systemStatus.textContent=
+      "SYSTEM ERROR";
+
+    connectionState.textContent=
+      "NET::ERROR";
+
+    researchStatus.textContent=
+      "ERROR";
+
+    log(
+      error.message,
+      "error"
+    );
+
+    addMessage(
+      "Ich konnte die Anfrage gerade nicht verarbeiten: "+
+      error.message,
+      "ai"
+    );
+
+    state.searching=false;
+
+    return;
+  }
+
+  const sources=
+    Array.isArray(result?.sources)
+      ? result.sources
+      : [];
+
+  renderSources(sources);
+
+  if(sources.length){
+
+    log(
+      `${sources.length} Quellen gefunden.`,
+      "good"
+    );
+
+  }else{
+
+    log(
+      "Keine verwertbaren Quellen-Metadaten zurückgegeben.",
+      "warn"
+    );
+  }
+
+  soundSourceFound();
+
+  await wait(400);
+
+  phaseComplete();
+  phaseActive(4);
+
+  opDone("process");
+  opStart("cross");
+
+  researchStatus.textContent=
+    "CROSS-CHECK";
+
+  soundCrossCheck();
+
+  renderCrossCheck();
+
+  log(
+    "Cross-check stage active.",
+    "info"
+  );
+
+  await wait(450);
+
+  phaseComplete();
+  phaseActive(5);
+
+  opDone("cross");
+  opStart("ai");
+
+  researchStatus.textContent=
+    "SYNTHESIZING";
+
+  renderSynthesis(
+    result?.reply ||
+    "Keine Antwort erhalten."
+  );
+
+  log(
+    "AI synthesis complete.",
+    "good"
+  );
+
+  await wait(420);
+
+  phaseComplete();
+  phaseActive(6);
+
+  await wait(220);
+
+  phaseComplete();
+
+  opDone("ai");
+
+  stopScanSound();
+  soundComplete();
+
+  processing.classList.remove("show");
+
+  core.classList.remove("active");
+
+  coreState.textContent="READY";
+
+  systemStatus.textContent=
+    "SYSTEM ONLINE";
+
+  connectionState.textContent=
+    "NET::READY";
+
+  researchStatus.textContent=
+    sources.length
+      ? `${sources.length} SOURCES`
+      : "COMPLETE";
+
+  addMessage(
+    result?.reply ||
+    "Recherche abgeschlossen.",
+    "ai"
+  );
+
+  state.searching=false;
+
+}
+
+
+/* =====================================================
+   WAIT
+===================================================== */
+
+function wait(ms){
+
+  return new Promise(
+    resolve=>setTimeout(resolve,ms)
+  );
+}
+
+
+/* =====================================================
+   CHAT COMMAND
+===================================================== */
+
+async function sendMessage(){
+
+  const text=
+    chatText.value.trim();
+
+  if(!text)return;
+
+  chatText.value="";
+
+  addMessage(text,"user");
+
+  queryInput.value=text;
+
+  await search(text);
+}
+
+
+/* =====================================================
+   ENTER
+===================================================== */
+
+queryInput.addEventListener(
+  "keydown",
+  e=>{
+
+    if(
+      e.key==="Enter" &&
+      !e.shiftKey
+    ){
+
+      e.preventDefault();
+
+      search(
+        queryInput.value
       );
-      if(
-        state==="connected"
-      ){
-        voiceRunning=true;
-        hudState.textContent="LISTENING";
-        statusSub.textContent="VOICE READY";
-        addMessage(
-          "Voice-Verbindung hergestellt.",
-          "ai"
-        );
+    }
+  }
+);
+
+chatText.addEventListener(
+  "keydown",
+  e=>{
+
+    if(
+      e.key==="Enter" &&
+      !e.shiftKey
+    ){
+
+      e.preventDefault();
+
+      sendMessage();
+    }
+  }
+);
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+$("searchButton")
+  .addEventListener(
+    "click",
+    ()=>{
+      search(queryInput.value);
+    }
+  );
+
+$("send")
+  .addEventListener(
+    "click",
+    sendMessage
+  );
+
+$("lucenSoundButton")
+  .addEventListener(
+    "click",
+    toggleLucenSound
+  );
+
+$("volume")
+  .addEventListener(
+    "input",
+    e=>{
+      setLucenVolume(
+        e.target.value
+      );
+    }
+  );
+
+$("clearButton")
+  .addEventListener(
+    "click",
+    ()=>{
+
+      activityLog.innerHTML="";
+
+      log(
+        "Activity log cleared.",
+        "info"
+      );
+    }
+  );
+
+$("wakeButton")
+  .addEventListener(
+    "click",
+    ()=>{
+
+      initLucenAudio();
+
+      soundBoot();
+
+      core.classList.add("active");
+
+      setTimeout(
+        ()=>{
+          core.classList.remove("active");
+          soundReady();
+        },
+        1000
+      );
+
+      voiceStatus.textContent=
+        "VOICE READY";
+
+      toast(
+        "LUCEN ist bereit."
+      );
+    }
+  );
+
+$("testButton")
+  .addEventListener(
+    "click",
+    async ()=>{
+
+      initLucenAudio();
+
+      soundBoot();
+
+      log(
+        "Running system diagnostics...",
+        "info"
+      );
+
+      await wait(300);
+
+      log(
+        "CORE ................. OK",
+        "good"
+      );
+
+      await wait(200);
+
+      log(
+        "NETWORK .............. OK",
+        "good"
+      );
+
+      await wait(200);
+
+      log(
+        "AI ENGINE ............ OK",
+        "good"
+      );
+
+      await wait(200);
+
+      log(
+        "VOICE INTERFACE ...... READY",
+        "good"
+      );
+
+      toast(
+        "SYSTEM TEST COMPLETE"
+      );
+
+      soundComplete();
+    }
+  );
+
+$("stopVoice")
+  .addEventListener(
+    "click",
+    disconnectVoice
+  );
+
+
+/* =====================================================
+   TABS
+===================================================== */
+
+document
+  .querySelectorAll(".tab")
+  .forEach(tab=>{
+
+    tab.addEventListener(
+      "click",
+      ()=>{
+
+        document
+          .querySelectorAll(".tab")
+          .forEach(t=>
+            t.classList.remove("active")
+          );
+
+        tab.classList.add("active");
+
+        const type=
+          tab.dataset.tab;
+
+        state.currentTab=type;
+
+        if(type==="sources"){
+
+          renderSources(
+            state.lastSources
+          );
+
+        }else if(type==="cross"){
+
+          renderCrossCheck();
+
+        }else if(type==="synthesis"){
+
+          const last=
+            messages.querySelector(
+              ".message.ai:last-child"
+            );
+
+          renderSynthesis(
+            last
+              ? last.innerText
+              : "Noch keine Synthese."
+          );
+
+        }else{
+
+          renderAnalysis({
+            analysis:[
+              "QUERY ANALYSIS",
+              "WORLD SEARCH",
+              "SOURCE DISCOVERY",
+              "SOURCE PROCESSING",
+              "CROSS CHECK",
+              "AI SYNTHESIS",
+              "RESPONSE"
+            ]
+          });
+        }
       }
+    );
+  });
+
+
+/* =====================================================
+   VOICE // WEBRTC
+===================================================== */
+
+async function startVoice(){
+
+  if(state.voice){
+
+    disconnectVoice();
+
+    return;
+  }
+
+  initLucenAudio();
+
+  soundVoice();
+
+  voiceStatus.textContent=
+    "CONNECTING...";
+
+  connectionState.textContent=
+    "VOICE::CONNECTING";
+
+  core.classList.add("active");
+
+  coreState.textContent=
+    "VOICE";
+
+  log(
+    "Voice interface connecting...",
+    "info"
+  );
+
+  try{
+
+    const pc=
+      new RTCPeerConnection();
+
+    state.pc=pc;
+
+    pc.onconnectionstatechange=()=>{
+
+      log(
+        "Voice connection: "+
+        pc.connectionState,
+        pc.connectionState==="connected"
+          ? "good"
+          : "info"
+      );
+
       if(
-        state==="failed" ||
-        state==="disconnected" ||
-        state==="closed"
+        pc.connectionState==="connected"
       ){
-        stopVoice();
+
+        state.voice=true;
+
+        voiceStatus.textContent=
+          "VOICE ACTIVE";
+
+        connectionState.textContent=
+          "VOICE::ACTIVE";
+
+        systemStatus.textContent=
+          "VOICE ACTIVE";
+
+        coreState.textContent=
+          "LISTENING";
+
+        core.classList.add("active");
+
+      }
+
+      if(
+        pc.connectionState==="failed" ||
+        pc.connectionState==="closed"
+      ){
+
+        disconnectVoice();
       }
     };
-    localStream
+
+
+    const audio=
+      document.createElement("audio");
+
+    audio.autoplay=true;
+
+    document.body.appendChild(audio);
+
+    state.audioEl=audio;
+
+    pc.ontrack=event=>{
+
+      if(event.streams?.[0]){
+
+        audio.srcObject=
+          event.streams[0];
+
+      }
+    };
+
+
+    const stream=
+      await navigator.mediaDevices
+        .getUserMedia({
+          audio:true
+        });
+
+
+    stream
       .getTracks()
       .forEach(track=>{
-        pc.addTrack(track,localStream);
+        pc.addTrack(
+          track,
+          stream
+        );
       });
-    dc=pc.createDataChannel("oai-events");
+
+
+    const dc=
+      pc.createDataChannel(
+        "oai-events"
+      );
+
+    state.dc=dc;
+
+
     dc.onopen=()=>{
-      log("Realtime Data Channel geöffnet","VOICE");
-      try{
-        dc.send(JSON.stringify({
-          type:"response.create"
-        }));
-      }catch{}
+
+      log(
+        "Realtime data channel open.",
+        "good"
+      );
+
+      voiceStatus.textContent=
+        "VOICE READY";
+
+      soundReady();
+
     };
+
+
+    dc.onmessage=event=>{
+
+      try{
+
+        const data=
+          JSON.parse(event.data);
+
+        handleRealtimeEvent(data);
+
+      }catch(error){
+
+        console.log(
+          "Realtime event:",
+          event.data
+        );
+      }
+
+    };
+
+
     const offer=
       await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    await waitForIceGathering(pc);
+
+    await pc.setLocalDescription(
+      offer
+    );
+
+
+    await new Promise(resolve=>{
+
+      if(
+        pc.iceGatheringState===
+        "complete"
+      ){
+
+        resolve();
+        return;
+      }
+
+      const check=()=>{
+
+        if(
+          pc.iceGatheringState===
+          "complete"
+        ){
+
+          pc.removeEventListener(
+            "icegatheringstatechange",
+            check
+          );
+
+          resolve();
+        }
+      };
+
+      pc.addEventListener(
+        "icegatheringstatechange",
+        check
+      );
+
+      setTimeout(
+        resolve,
+        3000
+      );
+
+    });
+
+
     const response=
       await fetch(
-        REALTIME_URL,
+        "/.netlify/functions/realtime",
         {
           method:"POST",
           headers:{
-            "Content-Type":"application/sdp"
+            "Content-Type":
+              "application/sdp"
           },
           body:pc.localDescription.sdp
         }
       );
-    const answer=await response.text();
+
+
     if(!response.ok){
+
+      const errorText=
+        await response.text();
+
       throw new Error(
-        answer ||
-        `Realtime HTTP ${response.status}`
+        errorText ||
+        "Realtime connection failed."
       );
     }
+
+
+    const answer=
+      await response.text();
+
+
     await pc.setRemoteDescription({
       type:"answer",
       sdp:answer
     });
-  }catch(error){
-    console.error(error);
+
+
     log(
-      error?.message ||
-      "Voice konnte nicht gestartet werden",
-      "ERROR"
+      "Realtime voice connected.",
+      "good"
     );
-    addMessage(
-      "Voice konnte nicht gestartet werden.",
-      "ai"
+
+    toast(
+      "VOICE AKTIV"
     );
-    stopVoice();
-  }
-}
-function waitForIceGathering(connection){
-  return new Promise(resolve=>{
-    if(
-      connection.iceGatheringState==="complete"
-    ){
-      resolve();
-      return;
+
+  }catch(error){
+
+    console.error(error);
+
+    log(
+      "Voice error: "+
+      error.message,
+      "error"
+    );
+
+    soundError();
+
+    voiceStatus.textContent=
+      "VOICE ERROR";
+
+    connectionState.textContent=
+      "VOICE::ERROR";
+
+    core.classList.remove("active");
+
+    coreState.textContent=
+      "READY";
+
+    if(state.pc){
+
+      try{
+        state.pc.close();
+      }catch{}
+
+      state.pc=null;
     }
-    const timeout=
-      setTimeout(resolve,3000);
-    connection.onicegatheringstatechange=()=>{
-      if(
-        connection.iceGatheringState==="complete"
-      ){
-        clearTimeout(timeout);
-        resolve();
+
+    toast(
+      "Voice konnte nicht gestartet werden."
+    );
+  }
+}
+
+
+/* =====================================================
+   REALTIME EVENTS
+===================================================== */
+
+function handleRealtimeEvent(data){
+
+  const type=data?.type||"";
+
+  if(
+    type.includes("response.audio")
+  ){
+
+    soundVoice();
+
+  }
+
+  if(
+    type.includes("input_audio_buffer")
+  ){
+
+    voiceStatus.textContent=
+      "LISTENING";
+
+    coreState.textContent=
+      "LISTENING";
+
+  }
+
+  if(
+    type.includes("response.created")
+  ){
+
+    voiceStatus.textContent=
+      "THINKING";
+
+    coreState.textContent=
+      "THINKING";
+
+    core.classList.add("active");
+
+  }
+
+  if(
+    type.includes("response.done")
+  ){
+
+    voiceStatus.textContent=
+      "VOICE ACTIVE";
+
+    coreState.textContent=
+      "LISTENING";
+
+  }
+
+  log(
+    "VOICE EVENT // "+type,
+    "info"
+  );
+}
+
+
+/* =====================================================
+   DISCONNECT VOICE
+===================================================== */
+
+function disconnectVoice(){
+
+  if(state.dc){
+
+    try{
+      state.dc.close();
+    }catch{}
+
+    state.dc=null;
+  }
+
+  if(state.pc){
+
+    try{
+      state.pc.close();
+    }catch{}
+
+    state.pc=null;
+  }
+
+  if(state.audioEl){
+
+    try{
+
+      if(state.audioEl.srcObject){
+
+        state.audioEl
+          .srcObject
+          .getTracks()
+          .forEach(
+            t=>t.stop()
+          );
       }
-    };
-  });
-}
-function stopVoice(){
-  voiceRunning=false;
-  voiceBtn.classList.remove("active");
-  if(dc){
-    try{
-      dc.close();
+
     }catch{}
-    dc=null;
+
+    state.audioEl.remove();
+    state.audioEl=null;
   }
-  if(pc){
-    try{
-      pc.close();
-    }catch{}
-    pc=null;
-  }
-  if(localStream){
-    localStream
-      .getTracks()
-      .forEach(track=>track.stop());
-    localStream=null;
-  }
-  hudState.textContent="STANDBY";
-  systemStatus.firstChild.textContent="ONLINE";
-  statusSub.textContent="AI CORE READY";
-  log("Voice-Verbindung beendet","VOICE");
+
+  state.voice=false;
+
+  voiceStatus.textContent=
+    "VOICE STANDBY";
+
+  connectionState.textContent=
+    "NET::READY";
+
+  core.classList.remove("active");
+
+  coreState.textContent=
+    "READY";
+
+  systemStatus.textContent=
+    "SYSTEM ONLINE";
+
+  log(
+    "Voice interface disconnected.",
+    "info"
+  );
+
+  toast(
+    "VOICE GETRENNT"
+  );
 }
-voiceBtn.addEventListener("click",()=>{
-  unlockAudio();
-  startVoice();
-});
-/* =========================================================
-   INITIAL STATE
-========================================================= */
-log("LUCEN System gestartet","SYSTEM");
-log("AI Core online","CORE");
-log("Web Interface bereit","SYSTEM");
-setTile("analysis","STANDBY","");
-setTile("search","STANDBY","");
-setTile("sources","WAITING","");
-setTile("process","WAITING","");
-setTile("verify","WAITING","");
-setTile("response","WAITING","");
-window.addEventListener("beforeunload",()=>{
-  try{
-    stopVoice();
-  }catch{}
-});
+
+
+/* =====================================================
+   VOICE BUTTON
+===================================================== */
+
+$("voiceButton")
+  .addEventListener(
+    "click",
+    startVoice
+  );
+
+
+/* =====================================================
+   RANDOM LATENCY
+===================================================== */
+
+function updateLatency(){
+
+  $("latency").textContent=
+    Math.floor(
+      24+Math.random()*48
+    );
+}
+
+setInterval(
+  updateLatency,
+  1800
+);
+
+updateLatency();
+
+
+/* =====================================================
+   BOOT
+===================================================== */
+
+function boot(){
+
+  log(
+    "LUCEN kernel initializing...",
+    "info"
+  );
+
+  setTimeout(
+    ()=>{
+      log(
+        "Neural core online.",
+        "good"
+      );
+    },
+    250
+  );
+
+  setTimeout(
+    ()=>{
+      log(
+        "Network interface ready.",
+        "good"
+      );
+    },
+    500
+  );
+
+  setTimeout(
+    ()=>{
+      log(
+        "Research engine ready.",
+        "good"
+      );
+    },
+    750
+  );
+
+  setTimeout(
+    ()=>{
+      log(
+        "Voice interface available.",
+        "good"
+      );
+
+      soundReady();
+
+    },
+    1000
+  );
+
+}
+
+boot();
+
+
+/* =====================================================
+   GLOBAL KEYBOARD
+===================================================== */
+
+document.addEventListener(
+  "keydown",
+  e=>{
+
+    if(
+      e.key==="/" &&
+      document.activeElement!==queryInput &&
+      document.activeElement!==chatText
+    ){
+
+      e.preventDefault();
+
+      queryInput.focus();
+    }
+
+    if(
+      e.key==="Escape" &&
+      state.voice
+    ){
+
+      disconnectVoice();
+    }
+  }
+);
+
+
+/* =====================================================
+   ONLINE / OFFLINE
+===================================================== */
+
+addEventListener(
+  "online",
+  ()=>{
+
+    connectionState.textContent=
+      "NET::ONLINE";
+
+    systemStatus.textContent=
+      "SYSTEM ONLINE";
+
+    log(
+      "Network connection restored.",
+      "good"
+    );
+
+  }
+);
+
+addEventListener(
+  "offline",
+  ()=>{
+
+    connectionState.textContent=
+      "NET::OFFLINE";
+
+    systemStatus.textContent=
+      "NETWORK OFFLINE";
+
+    log(
+      "Network connection lost.",
+      "warn"
+    );
+
+  }
+);
+
+
+/* =====================================================
+   PREVENT ACCIDENTAL ZOOM
+===================================================== */
+
+document.addEventListener(
+  "gesturestart",
+  e=>{
+    e.preventDefault();
+  }
+);
+
+
+/* =====================================================
+   INITIAL SOUND UNLOCK
+===================================================== */
+
+document.addEventListener(
+  "pointerdown",
+  ()=>{
+    initLucenAudio();
+  },
+  {
+    once:true,
+    passive:true
+  }
+);
+
 </script>
+
 </body>
 </html>
