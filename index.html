@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#02060b">
+<meta name="theme-color" content="#02070d">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>LUCEN — Global Intelligence</title>
+<title>LUCEN // AI CORE</title>
 
 <style>
 *{
@@ -14,79 +13,92 @@
   -webkit-tap-highlight-color:transparent;
 }
 
-:root{
-  --cyan:#00eaff;
-  --cyan2:#5ff6ff;
-  --blue:#168cff;
-  --green:#39ff9a;
-  --yellow:#ffd166;
-  --red:#ff4d6d;
-  --bg:#02060b;
-  --panel:rgba(4,15,24,.78);
-  --line:rgba(0,234,255,.22);
-  --text:#dffcff;
-  --muted:#6e9aa5;
-}
-
 html,body{
   margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#02060b;
-  color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",
-  "Segoe UI",sans-serif;
+  background:#02070d;
+  color:#bcefff;
+  font-family:
+    -apple-system,BlinkMacSystemFont,
+    "SF Pro Display","Segoe UI",sans-serif;
 }
 
 body{
   position:relative;
+  background:
+    radial-gradient(circle at 50% 45%,rgba(0,190,255,.09),transparent 38%),
+    radial-gradient(circle at 50% 100%,rgba(0,110,255,.08),transparent 45%),
+    #02070d;
 }
 
-/* BACKGROUND */
-
-body:before{
-  content:"";
-  position:fixed;
+canvas{
+  position:absolute;
   inset:0;
-  background:
-    radial-gradient(circle at 50% 42%,rgba(0,234,255,.10),transparent 30%),
-    radial-gradient(circle at 10% 90%,rgba(0,120,255,.07),transparent 30%),
-    linear-gradient(rgba(0,234,255,.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,234,255,.025) 1px,transparent 1px);
-  background-size:auto,auto,35px 35px,35px 35px;
-  pointer-events:none;
+  width:100%;
+  height:100%;
 }
 
 #stars{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  opacity:.55;
+  z-index:0;
 }
 
-/* APP */
+#world{
+  z-index:1;
+}
 
-.app{
-  position:relative;
+#fx{
   z-index:2;
-  width:100%;
-  height:100%;
+  pointer-events:none;
+}
+
+.scanlines{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  pointer-events:none;
+  opacity:.12;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(120,220,255,.08) 4px
+    );
+}
+
+.vignette{
+  position:absolute;
+  inset:0;
+  z-index:21;
+  pointer-events:none;
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 45%,
+      rgba(0,0,0,.72) 100%
+    );
+}
+
+.hud{
+  position:absolute;
+  inset:0;
+  z-index:10;
   display:flex;
   flex-direction:column;
   padding:
-    calc(env(safe-area-inset-top) + 12px)
-    12px
-    calc(env(safe-area-inset-bottom) + 10px);
+    max(14px,env(safe-area-inset-top))
+    14px
+    max(14px,env(safe-area-inset-bottom));
+  pointer-events:none;
 }
 
-/* HEADER */
-
-.header{
+.top{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  min-height:54px;
+  align-items:center;
+  pointer-events:auto;
 }
 
 .brand{
@@ -95,435 +107,404 @@ body:before{
   gap:10px;
 }
 
-.core-dot{
+.logo{
+  width:40px;
+  height:40px;
+  border:1px solid rgba(100,220,255,.65);
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  box-shadow:
+    0 0 15px rgba(0,200,255,.25),
+    inset 0 0 12px rgba(0,200,255,.12);
+  animation:logoPulse 2.5s infinite;
+}
+
+.logo::after{
+  content:"";
   width:12px;
   height:12px;
   border-radius:50%;
-  background:var(--cyan);
-  box-shadow:
-    0 0 8px var(--cyan),
-    0 0 24px var(--cyan);
-  animation:pulse 1.8s infinite;
+  background:#8cecff;
+  box-shadow:0 0 18px #28d9ff;
 }
 
-.brand h1{
-  margin:0;
-  font-size:19px;
-  letter-spacing:5px;
+@keyframes logoPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.06)}
+}
+
+.title{
+  font-size:20px;
   font-weight:700;
+  letter-spacing:5px;
+  color:#d9f9ff;
 }
 
-.brand small{
-  display:block;
-  color:var(--muted);
+.subtitle{
   font-size:8px;
-  letter-spacing:2px;
-  margin-top:2px;
-}
-
-.clock{
-  text-align:right;
-  font-family:monospace;
-  color:var(--cyan2);
-  font-size:12px;
-  letter-spacing:1px;
-}
-
-/* MAIN */
-
-.main{
-  flex:1;
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-/* INTELLIGENCE MAP */
-
-.map-panel{
-  position:relative;
-  flex:1;
-  min-height:260px;
-  overflow:hidden;
-  border:1px solid var(--line);
-  background:
-    radial-gradient(circle at center,rgba(0,234,255,.09),transparent 42%),
-    rgba(2,10,17,.82);
-  box-shadow:
-    inset 0 0 45px rgba(0,234,255,.045),
-    0 0 30px rgba(0,0,0,.4);
-}
-
-.map-title{
-  position:absolute;
-  z-index:4;
-  top:12px;
-  left:14px;
-  font-size:9px;
   letter-spacing:3px;
-  color:var(--cyan);
-}
-
-.map-status{
-  position:absolute;
-  z-index:4;
-  top:12px;
-  right:14px;
-  font-size:8px;
-  letter-spacing:2px;
-  color:var(--muted);
-}
-
-#mapCanvas{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-}
-
-/* MAP HUD */
-
-.map-grid{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:
-    linear-gradient(rgba(0,234,255,.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,234,255,.035) 1px,transparent 1px);
-  background-size:32px 32px;
-  mask-image:linear-gradient(to bottom,transparent,black 20%,black 80%,transparent);
-}
-
-.scan-line{
-  position:absolute;
-  left:0;
-  right:0;
-  height:1px;
-  background:linear-gradient(
-    90deg,
-    transparent,
-    var(--cyan),
-    transparent
-  );
-  opacity:.5;
-  animation:scanLine 4s linear infinite;
-  pointer-events:none;
-}
-
-.core-ring{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:92px;
-  height:92px;
-  transform:translate(-50%,-50%);
-  border:1px solid rgba(0,234,255,.38);
-  border-radius:50%;
-  box-shadow:
-    0 0 25px rgba(0,234,255,.12),
-    inset 0 0 20px rgba(0,234,255,.08);
-  pointer-events:none;
-}
-
-.core-ring:before,
-.core-ring:after{
-  content:"";
-  position:absolute;
-  inset:12px;
-  border:1px dashed rgba(0,234,255,.28);
-  border-radius:50%;
-}
-
-.core-ring:after{
-  inset:-15px;
-  border:1px solid rgba(0,234,255,.12);
-  animation:spin 12s linear infinite;
-}
-
-.core-label{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  color:var(--cyan);
-  font-size:8px;
-  letter-spacing:2px;
-  pointer-events:none;
-}
-
-/* TILES */
-
-.tiles{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:7px;
-}
-
-.tile{
-  min-width:0;
-  padding:9px 7px;
-  border:1px solid rgba(0,234,255,.15);
-  background:rgba(3,14,22,.72);
-  transition:.25s;
-}
-
-.tile.active{
-  border-color:rgba(0,234,255,.7);
-  box-shadow:
-    0 0 18px rgba(0,234,255,.12),
-    inset 0 0 18px rgba(0,234,255,.05);
-}
-
-.tile.done{
-  border-color:rgba(57,255,154,.45);
-}
-
-.tile.error{
-  border-color:rgba(255,77,109,.6);
-}
-
-.tile-icon{
-  font-size:12px;
-  margin-bottom:5px;
-}
-
-.tile-name{
-  font-size:7px;
-  letter-spacing:1.5px;
-  color:var(--muted);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.tile-state{
+  opacity:.55;
   margin-top:3px;
-  font-family:monospace;
-  font-size:8px;
-  color:var(--cyan);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
 }
 
-/* CHAT */
-
-.chat{
-  height:150px;
-  overflow-y:auto;
-  padding:8px 4px;
-  scrollbar-width:none;
-}
-
-.chat::-webkit-scrollbar{
-  display:none;
-}
-
-.message{
-  margin:5px 0;
-  max-width:88%;
-  padding:9px 11px;
-  border-left:2px solid var(--cyan);
-  background:rgba(4,17,27,.65);
-  font-size:13px;
-  line-height:1.4;
-  animation:messageIn .25s ease;
-}
-
-.message.user{
-  margin-left:auto;
-  border-left:0;
-  border-right:2px solid var(--blue);
+.status{
   text-align:right;
-}
-
-.message.system{
-  color:var(--muted);
-  font-family:monospace;
-  font-size:10px;
-}
-
-/* INPUT */
-
-.controls{
-  display:flex;
-  gap:7px;
-}
-
-.input-wrap{
-  flex:1;
-  position:relative;
-}
-
-#input{
-  width:100%;
-  height:48px;
-  border:1px solid rgba(0,234,255,.25);
-  outline:none;
-  border-radius:0;
-  background:rgba(2,12,20,.88);
-  color:var(--text);
-  padding:0 13px;
-  font-size:14px;
-  box-shadow:inset 0 0 18px rgba(0,234,255,.025);
-}
-
-#input:focus{
-  border-color:rgba(0,234,255,.65);
-  box-shadow:
-    0 0 20px rgba(0,234,255,.08),
-    inset 0 0 18px rgba(0,234,255,.04);
-}
-
-button{
-  border:1px solid rgba(0,234,255,.35);
-  background:rgba(4,20,30,.9);
-  color:var(--cyan);
-  min-width:48px;
-  height:48px;
-  font-size:18px;
-  cursor:pointer;
-}
-
-button:active{
-  transform:scale(.96);
-}
-
-#voiceBtn{
-  border-color:rgba(57,255,154,.35);
-  color:var(--green);
-}
-
-#voiceBtn.active{
-  border-color:var(--green);
-  box-shadow:0 0 22px rgba(57,255,154,.22);
-  animation:voicePulse 1s infinite;
-}
-
-#sendBtn{
-  font-size:15px;
-}
-
-#clearBtn{
-  color:var(--muted);
-  font-size:12px;
-}
-
-/* STATUS */
-
-.statusbar{
-  display:flex;
-  justify-content:space-between;
-  padding:6px 2px 0;
-  font-family:monospace;
-  font-size:8px;
-  letter-spacing:1.2px;
-  color:var(--muted);
-}
-
-.status-live{
-  color:var(--green);
-}
-
-/* PROCESS OVERLAY */
-
-.processing{
-  position:absolute;
-  inset:0;
-  z-index:10;
-  display:none;
-  pointer-events:none;
-}
-
-.processing.active{
-  display:block;
-}
-
-.processing:before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:rgba(0,8,14,.18);
-  backdrop-filter:blur(1px);
-}
-
-.processing-label{
-  position:absolute;
-  left:50%;
-  top:44%;
-  transform:translate(-50%,-50%);
-  text-align:center;
-  width:100%;
-}
-
-.processing-label strong{
-  display:block;
-  font-size:10px;
-  letter-spacing:4px;
-  color:var(--cyan);
-  text-shadow:0 0 15px var(--cyan);
-}
-
-.processing-label span{
-  display:block;
-  margin-top:7px;
-  font-family:monospace;
-  font-size:8px;
-  color:var(--muted);
+  font-size:9px;
   letter-spacing:2px;
 }
 
-/* ANIMATIONS */
-
-@keyframes pulse{
-  0%,100%{opacity:.65;transform:scale(.9)}
-  50%{opacity:1;transform:scale(1.15)}
+.statusDot{
+  display:inline-block;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#46f6c5;
+  box-shadow:0 0 12px #46f6c5;
+  margin-right:5px;
+  animation:statusPulse 1.2s infinite;
 }
 
-@keyframes scanLine{
-  from{top:0}
-  to{top:100%}
+@keyframes statusPulse{
+  50%{opacity:.3}
+}
+
+.coreArea{
+  position:absolute;
+  left:50%;
+  top:43%;
+  transform:translate(-50%,-50%);
+  width:min(72vw,340px);
+  aspect-ratio:1;
+  pointer-events:none;
+}
+
+.coreGlow{
+  position:absolute;
+  inset:20%;
+  border-radius:50%;
+  background:radial-gradient(
+    circle,
+    rgba(0,220,255,.35),
+    rgba(0,130,255,.12) 35%,
+    transparent 70%
+  );
+  filter:blur(12px);
+  animation:coreGlow 1.5s infinite alternate;
+}
+
+@keyframes coreGlow{
+  from{transform:scale(.85);opacity:.55}
+  to{transform:scale(1.15);opacity:1}
+}
+
+.ring{
+  position:absolute;
+  inset:8%;
+  border-radius:50%;
+  border:1px solid rgba(100,220,255,.22);
+  box-shadow:
+    0 0 30px rgba(0,190,255,.12),
+    inset 0 0 30px rgba(0,190,255,.06);
+}
+
+.ring.r1{
+  animation:spin 16s linear infinite;
+  border-top-color:#54e7ff;
+  border-bottom-color:rgba(84,231,255,.05);
+}
+
+.ring.r2{
+  inset:16%;
+  animation:spinReverse 11s linear infinite;
+  border-left-color:#59b9ff;
+  border-right-color:rgba(89,185,255,.05);
+}
+
+.ring.r3{
+  inset:26%;
+  animation:spin 7s linear infinite;
+  border-top-color:#b3f4ff;
+  border-bottom-color:#178bc0;
 }
 
 @keyframes spin{
   to{transform:rotate(360deg)}
 }
 
+@keyframes spinReverse{
+  to{transform:rotate(-360deg)}
+}
+
+.core{
+  position:absolute;
+  inset:35%;
+  border-radius:50%;
+  border:2px solid rgba(130,240,255,.9);
+  box-shadow:
+    0 0 15px rgba(0,210,255,.9),
+    0 0 45px rgba(0,150,255,.5),
+    inset 0 0 25px rgba(0,220,255,.45);
+  background:radial-gradient(
+    circle,
+    rgba(150,245,255,.85),
+    rgba(0,150,255,.25) 35%,
+    rgba(0,20,40,.8) 70%
+  );
+  animation:coreBeat 1.8s infinite;
+}
+
+@keyframes coreBeat{
+  0%,100%{transform:scale(.96)}
+  50%{transform:scale(1.05)}
+}
+
+.coreText{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  color:white;
+  text-shadow:0 0 12px #22d8ff;
+  font-size:10px;
+  letter-spacing:3px;
+  font-weight:700;
+}
+
+.coreText strong{
+  display:block;
+  font-size:18px;
+  letter-spacing:4px;
+}
+
+.progress{
+  position:absolute;
+  left:50%;
+  bottom:25%;
+  transform:translateX(-50%);
+  width:min(270px,70vw);
+  text-align:center;
+}
+
+.progressLabel{
+  display:flex;
+  justify-content:space-between;
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.7;
+  margin-bottom:6px;
+}
+
+.progressBar{
+  height:3px;
+  background:rgba(100,220,255,.12);
+  overflow:hidden;
+  border-radius:5px;
+}
+
+.progressFill{
+  width:0%;
+  height:100%;
+  background:#72eaff;
+  box-shadow:0 0 12px #38dfff;
+  transition:width .25s ease;
+}
+
+.tiles{
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:115px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+
+.tile{
+  min-height:48px;
+  padding:7px 5px;
+  border:1px solid rgba(100,220,255,.15);
+  background:rgba(0,20,35,.42);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  overflow:hidden;
+  position:relative;
+}
+
+.tile::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:100%;
+  height:1px;
+  background:#5de9ff;
+  box-shadow:0 0 8px #5de9ff;
+}
+
+.tile.active{
+  border-color:rgba(100,230,255,.65);
+  box-shadow:
+    0 0 16px rgba(0,190,255,.16),
+    inset 0 0 12px rgba(0,190,255,.05);
+}
+
+.tile.active::before{
+  animation:tileScan .8s linear infinite;
+}
+
+@keyframes tileScan{
+  to{left:100%}
+}
+
+.tileName{
+  font-size:7px;
+  letter-spacing:1.5px;
+  opacity:.5;
+}
+
+.tileValue{
+  margin-top:4px;
+  font-size:9px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.log{
+  position:absolute;
+  left:14px;
+  right:14px;
+  bottom:65px;
+  height:40px;
+  overflow:hidden;
+  font-family:monospace;
+  font-size:8px;
+  line-height:13px;
+  opacity:.55;
+  text-shadow:0 0 8px rgba(80,220,255,.5);
+}
+
+.logLine{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.inputArea{
+  position:absolute;
+  left:10px;
+  right:10px;
+  bottom:max(8px,env(safe-area-inset-bottom));
+  display:flex;
+  gap:6px;
+  pointer-events:auto;
+}
+
+.input{
+  flex:1;
+  min-width:0;
+  height:48px;
+  border:1px solid rgba(100,220,255,.3);
+  border-radius:12px;
+  outline:none;
+  background:rgba(2,15,25,.78);
+  color:#d8faff;
+  padding:0 14px;
+  font-size:14px;
+  box-shadow:
+    0 0 18px rgba(0,150,255,.08),
+    inset 0 0 15px rgba(0,150,255,.04);
+}
+
+.input::placeholder{
+  color:rgba(180,230,245,.35);
+}
+
+.btn{
+  width:48px;
+  height:48px;
+  border:1px solid rgba(100,220,255,.35);
+  border-radius:12px;
+  background:rgba(2,20,32,.85);
+  color:#bcefff;
+  font-size:18px;
+  box-shadow:0 0 15px rgba(0,170,255,.08);
+}
+
+.btn:active{
+  transform:scale(.94);
+}
+
+.voice{
+  border-color:rgba(75,240,210,.45);
+}
+
+.voice.live{
+  background:rgba(0,90,80,.4);
+  border-color:#4affd1;
+  box-shadow:0 0 25px rgba(50,255,210,.25);
+  animation:voicePulse 1s infinite;
+}
+
 @keyframes voicePulse{
-  0%,100%{box-shadow:0 0 10px rgba(57,255,154,.12)}
-  50%{box-shadow:0 0 28px rgba(57,255,154,.32)}
+  50%{box-shadow:0 0 40px rgba(50,255,210,.45)}
 }
 
-@keyframes messageIn{
-  from{
-    opacity:0;
-    transform:translateY(5px);
-  }
-  to{
-    opacity:1;
-    transform:none;
-  }
+.processing{
+  position:absolute;
+  inset:0;
+  z-index:30;
+  display:none;
+  place-items:center;
+  pointer-events:none;
 }
 
-@media(max-width:430px){
+.processing.show{
+  display:grid;
+}
+
+.processingText{
+  text-align:center;
+  letter-spacing:4px;
+  font-size:9px;
+  text-shadow:0 0 15px #38dfff;
+}
+
+.processingText strong{
+  display:block;
+  font-size:24px;
+  margin-bottom:8px;
+  letter-spacing:6px;
+}
+
+.hit{
+  position:absolute;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  border:1px solid #a9f5ff;
+  box-shadow:0 0 18px #28dfff;
+  pointer-events:none;
+  z-index:5;
+}
+
+@media(max-width:390px){
   .tiles{
-    grid-template-columns:repeat(2,1fr);
+    bottom:116px;
   }
 
-  .chat{
-    height:125px;
+  .tile{
+    min-height:43px;
   }
 
-  .map-panel{
-    min-height:245px;
+  .tileValue{
+    font-size:8px;
   }
-}
 
-@media(min-width:700px){
-  .app{
-    max-width:1000px;
-    margin:auto;
+  .title{
+    font-size:17px;
   }
 }
 </style>
@@ -532,268 +513,233 @@ button:active{
 <body>
 
 <canvas id="stars"></canvas>
+<canvas id="world"></canvas>
+<canvas id="fx"></canvas>
 
-<div class="app">
+<div class="scanlines"></div>
+<div class="vignette"></div>
 
-  <header class="header">
+<div class="hud">
+
+  <div class="top">
 
     <div class="brand">
-      <div class="core-dot"></div>
+      <div class="logo"></div>
 
       <div>
-        <h1>LUCEN</h1>
-        <small>GLOBAL INTELLIGENCE SYSTEM</small>
+        <div class="title">LUCEN</div>
+        <div class="subtitle">PERSONAL INTELLIGENCE SYSTEM</div>
       </div>
     </div>
 
-    <div class="clock" id="clock">
-      --:--:--
+    <div class="status">
+      <span class="statusDot"></span>
+      ONLINE
+      <br>
+      <span id="clock">--:--:--</span>
     </div>
 
-  </header>
+  </div>
 
-  <main class="main">
+  <div class="coreArea">
 
-    <section class="map-panel">
+    <div class="coreGlow"></div>
 
-      <div class="map-title">
-        GLOBAL INTELLIGENCE
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+
+    <div class="core">
+      <div class="coreText">
+        <strong>LUCEN</strong>
+        AI CORE
       </div>
-
-      <div class="map-status" id="mapStatus">
-        SYSTEM READY
-      </div>
-
-      <canvas id="mapCanvas"></canvas>
-
-      <div class="map-grid"></div>
-      <div class="scan-line"></div>
-
-      <div class="core-ring"></div>
-
-      <div class="core-label">
-        LUCEN CORE
-      </div>
-
-      <div class="processing" id="processing">
-
-        <div class="processing-label">
-
-          <strong id="processingTitle">
-            ANALYZING
-          </strong>
-
-          <span id="processingSub">
-            INITIALIZING INTELLIGENCE CORE
-          </span>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    <section class="tiles">
-
-      <div class="tile" id="tile-analysis">
-        <div class="tile-icon">🧠</div>
-        <div class="tile-name">ANALYSIS</div>
-        <div class="tile-state">READY</div>
-      </div>
-
-      <div class="tile" id="tile-web">
-        <div class="tile-icon">🌐</div>
-        <div class="tile-name">WEB SEARCH</div>
-        <div class="tile-state">READY</div>
-      </div>
-
-      <div class="tile" id="tile-source">
-        <div class="tile-icon">📡</div>
-        <div class="tile-name">SOURCES</div>
-        <div class="tile-state">STANDBY</div>
-      </div>
-
-      <div class="tile" id="tile-process">
-        <div class="tile-icon">⚡</div>
-        <div class="tile-name">PROCESSING</div>
-        <div class="tile-state">READY</div>
-      </div>
-
-    </section>
-
-    <section class="chat" id="chat">
-
-      <div class="message system">
-        LUCEN CORE ONLINE — ALL SYSTEMS READY
-      </div>
-
-      <div class="message">
-        Guten Tag. Ich bin LUCEN. Wie kann ich helfen?
-      </div>
-
-    </section>
-
-    <section class="controls">
-
-      <div class="input-wrap">
-        <input
-          id="input"
-          type="text"
-          autocomplete="off"
-          placeholder="Befehl an LUCEN..."
-        >
-      </div>
-
-      <button id="voiceBtn" aria-label="Voice">
-        ◉
-      </button>
-
-      <button id="sendBtn" aria-label="Senden">
-        ➤
-      </button>
-
-      <button id="clearBtn" aria-label="Löschen">
-        ×
-      </button>
-
-    </section>
-
-    <div class="statusbar">
-      <span>
-        <span class="status-live">● ONLINE</span>
-        &nbsp; LUCEN CORE
-      </span>
-
-      <span id="activity">
-        STANDBY
-      </span>
-
-      <span id="latency">
-        0 MS
-      </span>
     </div>
 
-  </main>
+  </div>
+
+  <div class="progress">
+
+    <div class="progressLabel">
+      <span id="operation">SYSTEM READY</span>
+      <span id="percent">0%</span>
+    </div>
+
+    <div class="progressBar">
+      <div class="progressFill" id="progressFill"></div>
+    </div>
+
+  </div>
+
+  <div class="tiles">
+
+    <div class="tile" id="tileAnalysis">
+      <div class="tileName">ANALYSIS</div>
+      <div class="tileValue" id="analysisValue">STANDBY</div>
+    </div>
+
+    <div class="tile" id="tileWeb">
+      <div class="tileName">WEB SEARCH</div>
+      <div class="tileValue" id="webValue">READY</div>
+    </div>
+
+    <div class="tile" id="tileSources">
+      <div class="tileName">SOURCES</div>
+      <div class="tileValue" id="sourceValue">0</div>
+    </div>
+
+    <div class="tile" id="tileProcess">
+      <div class="tileName">PROCESSING</div>
+      <div class="tileValue" id="processValue">IDLE</div>
+    </div>
+
+    <div class="tile">
+      <div class="tileName">NETWORK</div>
+      <div class="tileValue" id="networkValue">CONNECTED</div>
+    </div>
+
+    <div class="tile">
+      <div class="tileName">MEMORY</div>
+      <div class="tileValue">READY</div>
+    </div>
+
+    <div class="tile">
+      <div class="tileName">CORE</div>
+      <div class="tileValue">GPT ACTIVE</div>
+    </div>
+
+    <div class="tile">
+      <div class="tileName">SECURITY</div>
+      <div class="tileValue">NOMINAL</div>
+    </div>
+
+  </div>
+
+  <div class="log" id="log"></div>
+
+  <div class="inputArea">
+
+    <input
+      id="input"
+      class="input"
+      type="text"
+      autocomplete="off"
+      placeholder="Mit LUCEN sprechen..."
+    >
+
+    <button
+      id="send"
+      class="btn"
+      type="button"
+    >➤</button>
+
+    <button
+      id="voice"
+      class="btn voice"
+      type="button"
+    >🎙</button>
+
+  </div>
+
+</div>
+
+<div class="processing" id="processing">
+
+  <div class="processingText">
+
+    <strong id="processingTitle">
+      ANALYZING
+    </strong>
+
+    <span id="processingSub">
+      LUCEN CORE ACTIVE
+    </span>
+
+  </div>
 
 </div>
 
 <script>
-/* =========================================================
-   LUCEN — ENDLEVEL FRONTEND
-   Voice endpoint intentionally remains untouched.
-   ========================================================= */
-
-const API = "/.netlify/functions/lucen-v2";
-
-const input = document.getElementById("input");
-const sendBtn = document.getElementById("sendBtn");
-const voiceBtn = document.getElementById("voiceBtn");
-const clearBtn = document.getElementById("clearBtn");
-
-const chat = document.getElementById("chat");
-const clock = document.getElementById("clock");
-
-const mapCanvas = document.getElementById("mapCanvas");
-const mapCtx = mapCanvas.getContext("2d");
-
-const mapStatus = document.getElementById("mapStatus");
-const processing = document.getElementById("processing");
-const processingTitle = document.getElementById("processingTitle");
-const processingSub = document.getElementById("processingSub");
-
-const activity = document.getElementById("activity");
-const latency = document.getElementById("latency");
 
 /* =========================================================
-   CLOCK
+   LUCEN VISUAL CORE
    ========================================================= */
 
-function updateClock(){
-  const now = new Date();
+const stars = document.getElementById("stars");
+const world = document.getElementById("world");
+const fx = document.getElementById("fx");
 
-  clock.textContent =
-    now.toLocaleTimeString("de-DE", {
-      hour12:false
-    });
+const sc = stars.getContext("2d");
+const wc = world.getContext("2d");
+const fc = fx.getContext("2d");
+
+let W = innerWidth;
+let H = innerHeight;
+
+function resize(){
+
+  W = innerWidth;
+  H = innerHeight;
+
+  for(const c of [stars,world,fx]){
+    c.width = W * devicePixelRatio;
+    c.height = H * devicePixelRatio;
+    c.style.width = W+"px";
+    c.style.height = H+"px";
+
+    const ctx =
+      c === stars ? sc :
+      c === world ? wc : fc;
+
+    ctx.setTransform(
+      devicePixelRatio,
+      0,
+      0,
+      devicePixelRatio,
+      0,
+      0
+    );
+  }
 }
 
-setInterval(updateClock,1000);
-updateClock();
+addEventListener("resize",resize);
+resize();
+
 
 /* =========================================================
-   STARFIELD
+   STAR FIELD
    ========================================================= */
 
-const starsCanvas = document.getElementById("stars");
-const starsCtx = starsCanvas.getContext("2d");
+const starList = [];
 
-let stars = [];
+for(let i=0;i<180;i++){
 
-function resizeStars(){
+  starList.push({
+    x:Math.random()*W,
+    y:Math.random()*H,
+    r:Math.random()*1.3+.15,
+    a:Math.random(),
+    s:Math.random()*.01+.002
+  });
 
-  starsCanvas.width =
-    window.innerWidth * devicePixelRatio;
-
-  starsCanvas.height =
-    window.innerHeight * devicePixelRatio;
-
-  starsCtx.setTransform(
-    devicePixelRatio,
-    0,
-    0,
-    devicePixelRatio,
-    0,
-    0
-  );
-
-  stars = [];
-
-  const count =
-    Math.min(
-      180,
-      Math.floor(
-        window.innerWidth *
-        window.innerHeight /
-        6500
-      )
-    );
-
-  for(let i=0;i<count;i++){
-
-    stars.push({
-      x:Math.random()*window.innerWidth,
-      y:Math.random()*window.innerHeight,
-      r:Math.random()*1.2,
-      a:Math.random(),
-      s:.002+Math.random()*.006
-    });
-
-  }
 }
 
 function drawStars(){
 
-  starsCtx.clearRect(
-    0,
-    0,
-    window.innerWidth,
-    window.innerHeight
-  );
+  sc.clearRect(0,0,W,H);
 
-  for(const s of stars){
+  for(const s of starList){
 
     s.a += s.s;
 
-    if(s.a > 1 || s.a < .1){
-      s.s *= -1;
-    }
+    const alpha =
+      .18 +
+      Math.abs(Math.sin(s.a))*0.5;
 
-    starsCtx.globalAlpha =
-      Math.max(.05,Math.min(.7,s.a));
+    sc.globalAlpha = alpha;
 
-    starsCtx.beginPath();
-
-    starsCtx.arc(
+    sc.beginPath();
+    sc.arc(
       s.x,
       s.y,
       s.r,
@@ -801,775 +747,691 @@ function drawStars(){
       Math.PI*2
     );
 
-    starsCtx.fillStyle =
-      "rgba(130,230,255,.8)";
-
-    starsCtx.fill();
-
+    sc.fillStyle="#8ddfff";
+    sc.fill();
   }
 
-  requestAnimationFrame(drawStars);
+  sc.globalAlpha=1;
 }
 
-resizeStars();
-drawStars();
-
-window.addEventListener("resize",resizeStars);
 
 /* =========================================================
-   WORLD MAP
+   WORLD / RADAR GRID
    ========================================================= */
 
-let mapW = 0;
-let mapH = 0;
+let worldAngle=0;
 
-let targets = [];
-let packets = [];
+const targets = [];
 
-const cities = [
-  {name:"EUROPE",lat:50,lon:10},
-  {name:"USA",lat:39,lon:-98},
-  {name:"ASIA",lat:35,lon:105},
-  {name:"JAPAN",lat:36,lon:138},
-  {name:"UK",lat:54,lon:-3},
-  {name:"SWITZERLAND",lat:46.8,lon:8.2},
-  {name:"GERMANY",lat:51,lon:10},
-  {name:"AUSTRALIA",lat:-25,lon:133},
-  {name:"CANADA",lat:56,lon:-106},
-  {name:"BRAZIL",lat:-10,lon:-52}
-];
+function createTarget(){
 
-function resizeMap(){
+  targets.push({
 
-  const rect =
-    mapCanvas.getBoundingClientRect();
+    x:W*.18 + Math.random()*W*.64,
+    y:H*.25 + Math.random()*H*.32,
 
-  mapW =
-    Math.max(1,rect.width);
+    life:1,
+    size:2+Math.random()*3,
 
-  mapH =
-    Math.max(1,rect.height);
+    pulse:Math.random()*Math.PI*2
 
-  mapCanvas.width =
-    mapW * devicePixelRatio;
+  });
 
-  mapCanvas.height =
-    mapH * devicePixelRatio;
-
-  mapCtx.setTransform(
-    devicePixelRatio,
-    0,
-    0,
-    devicePixelRatio,
-    0,
-    0
-  );
+  if(targets.length>14)
+    targets.shift();
 }
 
-function project(lat,lon){
+function drawWorld(){
 
-  /*
-   * Stylized Mercator-like projection.
-   * The HUD is intentionally lightweight for iPhone.
-   */
+  wc.clearRect(0,0,W,H);
 
-  const x =
-    (lon + 180) / 360 * mapW;
+  const cx=W/2;
+  const cy=H*.43;
 
-  const latRad =
-    lat * Math.PI / 180;
+  const radius=Math.min(W*.46,H*.29);
 
-  const merc =
-    Math.log(
-      Math.tan(
-        Math.PI/4 + latRad/2
-      )
+  /* globe */
+
+  wc.save();
+
+  wc.translate(cx,cy);
+
+  wc.strokeStyle="rgba(50,190,240,.13)";
+  wc.lineWidth=1;
+
+  for(let i=-4;i<=4;i++){
+
+    const y=i*radius*.22;
+
+    wc.beginPath();
+
+    wc.ellipse(
+      0,
+      y,
+      radius,
+      Math.max(2,radius*.18),
+      0,
+      0,
+      Math.PI*2
     );
 
-  const max =
-    Math.PI;
+    wc.stroke();
+  }
 
-  const y =
-    mapH/2 -
-    (merc/max) *
-    mapH *
-    .48;
+  for(let i=-5;i<=5;i++){
 
-  return {x,y};
-}
+    const x=i*radius*.18;
 
-function drawMap(){
+    wc.beginPath();
 
-  mapCtx.clearRect(
+    wc.ellipse(
+      x,
+      0,
+      Math.max(2,radius*.2),
+      radius,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    wc.stroke();
+  }
+
+  wc.beginPath();
+
+  wc.arc(
     0,
     0,
-    mapW,
-    mapH
+    radius,
+    0,
+    Math.PI*2
   );
 
-  /* Globe-like longitude/latitude */
+  wc.stroke();
 
-  mapCtx.lineWidth = 1;
-  mapCtx.strokeStyle =
-    "rgba(0,234,255,.08)";
+  /* latitude */
 
-  for(let lon=-180;lon<=180;lon+=30){
+  wc.strokeStyle="rgba(60,210,255,.07)";
 
-    mapCtx.beginPath();
+  for(let y=-radius;y<=radius;y+=18){
 
-    for(let lat=-80;lat<=80;lat+=4){
-
-      const p =
-        project(lat,lon);
-
-      if(lat === -80){
-        mapCtx.moveTo(p.x,p.y);
-      }else{
-        mapCtx.lineTo(p.x,p.y);
-      }
-
-    }
-
-    mapCtx.stroke();
-  }
-
-  for(let lat=-60;lat<=60;lat+=20){
-
-    mapCtx.beginPath();
-
-    for(let lon=-180;lon<=180;lon+=4){
-
-      const p =
-        project(lat,lon);
-
-      if(lon === -180){
-        mapCtx.moveTo(p.x,p.y);
-      }else{
-        mapCtx.lineTo(p.x,p.y);
-      }
-
-    }
-
-    mapCtx.stroke();
-  }
-
-  /* Stylized continents */
-
-  mapCtx.strokeStyle =
-    "rgba(0,234,255,.18)";
-
-  mapCtx.lineWidth = 1.3;
-
-  const shapes = [
-    [[-165,70],[-140,55],[-125,50],[-105,30],[-85,25],[-65,45],[-55,60],[-100,75],[-165,70]],
-    [[-80,10],[-65,0],[-60,-20],[-50,-40],[-65,-55],[-80,-30],[-80,10]],
-    [[-20,35],[0,40],[20,60],[50,65],[80,55],[110,45],[145,55],[170,40],[150,20],[120,5],[90,15],[60,5],[30,10],[10,25],[-20,35]],
-    [[-20,35],[-5,10],[10,-5],[25,-30],[10,-35],[-5,-10],[-20,10],[-20,35]],
-    [[110,-10],[140,-15],[155,-30],[145,-45],[115,-35],[110,-10]]
-  ];
-
-  for(const shape of shapes){
-
-    mapCtx.beginPath();
-
-    shape.forEach((point,i)=>{
-
-      const p =
-        project(point[1],point[0]);
-
-      if(i===0){
-        mapCtx.moveTo(p.x,p.y);
-      }else{
-        mapCtx.lineTo(p.x,p.y);
-      }
-
-    });
-
-    mapCtx.stroke();
+    wc.beginPath();
+    wc.moveTo(-radius,y);
+    wc.lineTo(radius,y);
+    wc.stroke();
 
   }
 
-  /* Targets */
+  wc.restore();
+
+
+  /* radar sweep */
+
+  worldAngle += .008;
+
+  wc.save();
+
+  wc.translate(cx,cy);
+
+  wc.rotate(worldAngle);
+
+  const grad=wc.createLinearGradient(
+    0,0,
+    radius,0
+  );
+
+  grad.addColorStop(0,"rgba(70,230,255,0)");
+  grad.addColorStop(.75,"rgba(70,230,255,.08)");
+  grad.addColorStop(1,"rgba(100,240,255,.3)");
+
+  wc.fillStyle=grad;
+
+  wc.beginPath();
+  wc.moveTo(0,0);
+  wc.arc(
+    0,
+    0,
+    radius,
+    -.35,
+    .35
+  );
+
+  wc.closePath();
+  wc.fill();
+
+  wc.restore();
+
+
+  /* targets */
 
   for(const t of targets){
 
-    t.phase += .035;
+    t.pulse += .08;
 
     const p =
-      project(t.lat,t.lon);
+      1 +
+      Math.sin(t.pulse)*.5;
 
-    const radius =
-      5 + Math.sin(t.phase)*3;
+    wc.beginPath();
 
-    mapCtx.beginPath();
-
-    mapCtx.arc(
-      p.x,
-      p.y,
-      radius,
+    wc.arc(
+      t.x,
+      t.y,
+      t.size*p,
       0,
       Math.PI*2
     );
 
-    mapCtx.strokeStyle =
-      "rgba(0,234,255,.45)";
+    wc.fillStyle="rgba(100,235,255,.9)";
+    wc.shadowBlur=15;
+    wc.shadowColor="#29dfff";
+    wc.fill();
 
-    mapCtx.stroke();
+    wc.shadowBlur=0;
 
-    mapCtx.beginPath();
+    wc.beginPath();
 
-    mapCtx.arc(
-      p.x,
-      p.y,
-      2.2,
+    wc.arc(
+      t.x,
+      t.y,
+      10+p*3,
       0,
       Math.PI*2
     );
 
-    mapCtx.fillStyle =
-      "#00eaff";
-
-    mapCtx.shadowBlur = 12;
-    mapCtx.shadowColor = "#00eaff";
-
-    mapCtx.fill();
-
-    mapCtx.shadowBlur = 0;
-
-    mapCtx.font =
-      "7px monospace";
-
-    mapCtx.fillStyle =
-      "rgba(100,240,255,.7)";
-
-    mapCtx.fillText(
-      t.name,
-      p.x + 8,
-      p.y - 7
-    );
+    wc.strokeStyle="rgba(60,220,255,.25)";
+    wc.stroke();
 
   }
+}
 
-  /* Data packets */
+
+/* =========================================================
+   DATA PACKETS
+   ========================================================= */
+
+const packets=[];
+
+function spawnPacket(){
+
+  const start={
+    x:W/2,
+    y:H*.43
+  };
+
+  const target=
+    targets[
+      Math.floor(
+        Math.random()*targets.length
+      )
+    ];
+
+  if(!target)return;
+
+  packets.push({
+
+    x:start.x,
+    y:start.y,
+
+    tx:target.x,
+    ty:target.y,
+
+    p:0,
+
+    speed:.008+Math.random()*.018
+
+  });
+
+}
+
+function drawPackets(){
 
   for(let i=packets.length-1;i>=0;i--){
 
-    const packet = packets[i];
+    const p=packets[i];
 
-    packet.progress += .012;
+    p.p += p.speed;
 
-    const x =
-      packet.from.x +
-      (packet.to.x - packet.from.x) *
-      packet.progress;
+    p.x +=
+      (p.tx-p.x)*.035;
 
-    const y =
-      packet.from.y +
-      (packet.to.y - packet.from.y) *
-      packet.progress;
+    p.y +=
+      (p.ty-p.y)*.035;
 
-    mapCtx.beginPath();
+    fc.beginPath();
 
-    mapCtx.arc(
-      x,
-      y,
+    fc.arc(
+      p.x,
+      p.y,
       2,
       0,
       Math.PI*2
     );
 
-    mapCtx.fillStyle =
-      "#5ff6ff";
+    fc.fillStyle="#baf8ff";
+    fc.shadowBlur=12;
+    fc.shadowColor="#22dfff";
+    fc.fill();
 
-    mapCtx.shadowBlur = 15;
-    mapCtx.shadowColor = "#00eaff";
+    fc.shadowBlur=0;
 
-    mapCtx.fill();
-
-    mapCtx.shadowBlur = 0;
-
-    if(packet.progress >= 1){
+    if(p.p>=1)
       packets.splice(i,1);
-    }
 
   }
 
-  requestAnimationFrame(drawMap);
 }
 
-function addTarget(name){
-
-  const city =
-    cities.find(
-      c =>
-        name.toLowerCase()
-        .includes(c.name.toLowerCase())
-    );
-
-  const source =
-    city ||
-    cities[
-      Math.floor(
-        Math.random()*cities.length
-      )
-    ];
-
-  targets.push({
-    name:source.name,
-    lat:source.lat,
-    lon:source.lon,
-    phase:Math.random()*Math.PI*2
-  });
-
-  if(targets.length > 8){
-    targets.shift();
-  }
-
-  createPacketTo(source);
-}
-
-function createPacketTo(city){
-
-  const center =
-    project(0,0);
-
-  const destination =
-    project(city.lat,city.lon);
-
-  packets.push({
-    from:center,
-    to:destination,
-    progress:0
-  });
-
-}
-
-resizeMap();
-drawMap();
-
-window.addEventListener("resize",resizeMap);
 
 /* =========================================================
-   AUDIO ENGINE
+   FX LOOP
    ========================================================= */
 
-let audioContext = null;
+function animationLoop(){
 
-function audio(){
+  drawStars();
+  drawWorld();
 
-  if(!audioContext){
-    audioContext =
-      new (
-        window.AudioContext ||
-        window.webkitAudioContext
-      )();
-  }
+  fc.clearRect(0,0,W,H);
 
-  if(audioContext.state === "suspended"){
-    audioContext.resume();
-  }
+  drawPackets();
 
-  return audioContext;
-}
-
-function tone(
-  frequency,
-  duration,
-  type="sine",
-  volume=.035,
-  delay=0
-){
-
-  try{
-
-    const ctx = audio();
-
-    const osc =
-      ctx.createOscillator();
-
-    const gain =
-      ctx.createGain();
-
-    osc.type = type;
-
-    osc.frequency.setValueAtTime(
-      frequency,
-      ctx.currentTime + delay
-    );
-
-    gain.gain.setValueAtTime(
-      0,
-      ctx.currentTime + delay
-    );
-
-    gain.gain.linearRampToValueAtTime(
-      volume,
-      ctx.currentTime + delay + .01
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-      .001,
-      ctx.currentTime + delay + duration
-    );
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(
-      ctx.currentTime + delay
-    );
-
-    osc.stop(
-      ctx.currentTime +
-      delay +
-      duration +
-      .02
-    );
-
-  }catch{}
+  requestAnimationFrame(animationLoop);
 
 }
 
-function soundStart(){
+animationLoop();
 
-  tone(180,.10,"sine",.04);
-  tone(360,.14,"sine",.03,.07);
-  tone(720,.20,"triangle",.025,.15);
-
-}
-
-function soundSearch(){
-
-  tone(420,.07,"square",.018);
-  tone(620,.07,"square",.018,.09);
-  tone(840,.12,"sine",.02,.18);
-
-}
-
-function soundHit(){
-
-  tone(880,.08,"sine",.035);
-  tone(1320,.18,"triangle",.025,.08);
-
-}
-
-function soundComplete(){
-
-  tone(520,.10,"sine",.025);
-  tone(780,.12,"sine",.03,.09);
-  tone(1040,.22,"triangle",.035,.19);
-
-}
 
 /* =========================================================
-   TILE SYSTEM
+   HUD STATE
    ========================================================= */
 
-function tile(name){
-  return document.getElementById(
-    "tile-" + name
-  );
-}
+const input =
+  document.getElementById("input");
 
-function setTile(
-  name,
-  state,
-  mode="active"
-){
+const send =
+  document.getElementById("send");
 
-  const el = tile(name);
+const voice =
+  document.getElementById("voice");
 
-  if(!el) return;
+const log =
+  document.getElementById("log");
 
-  el.classList.remove(
-    "active",
-    "done",
-    "error"
-  );
+const progressFill =
+  document.getElementById("progressFill");
 
-  if(mode){
-    el.classList.add(mode);
-  }
+const percent =
+  document.getElementById("percent");
 
-  const stateEl =
-    el.querySelector(".tile-state");
+const operation =
+  document.getElementById("operation");
 
-  if(stateEl){
-    stateEl.textContent =
-      state;
-  }
+const processing =
+  document.getElementById("processing");
 
-}
+const processingTitle =
+  document.getElementById("processingTitle");
 
-function resetTiles(){
+const processingSub =
+  document.getElementById("processingSub");
 
-  setTile(
-    "analysis",
-    "READY",
-    ""
-  );
+const analysisValue =
+  document.getElementById("analysisValue");
 
-  setTile(
-    "web",
-    "READY",
-    ""
-  );
+const webValue =
+  document.getElementById("webValue");
 
-  setTile(
-    "source",
-    "STANDBY",
-    ""
-  );
+const sourceValue =
+  document.getElementById("sourceValue");
 
-  setTile(
-    "process",
-    "READY",
-    ""
-  );
+const processValue =
+  document.getElementById("processValue");
 
-}
+const tileAnalysis =
+  document.getElementById("tileAnalysis");
 
-function beginAnalysis(isWeb){
+const tileWeb =
+  document.getElementById("tileWeb");
 
-  resetTiles();
+const tileSources =
+  document.getElementById("tileSources");
 
-  processing.classList.add("active");
+const tileProcess =
+  document.getElementById("tileProcess");
 
-  activity.textContent =
-    "ANALYZING";
 
-  mapStatus.textContent =
-    isWeb
-      ? "GLOBAL SEARCH ACTIVE"
-      : "AI CORE ACTIVE";
+function addLog(text){
 
-  setTile(
-    "analysis",
-    "PROCESSING...",
-    "active"
-  );
-
-  processingTitle.textContent =
-    "ANALYZING";
-
-  processingSub.textContent =
-    "INITIALIZING INTELLIGENCE CORE";
-
-  soundStart();
-
-  setTimeout(()=>{
-
-    setTile(
-      "analysis",
-      "COMPLETE",
-      "done"
-    );
-
-    if(isWeb){
-
-      setTile(
-        "web",
-        "SCANNING...",
-        "active"
-      );
-
-      processingTitle.textContent =
-        "GLOBAL SEARCH";
-
-      processingSub.textContent =
-        "SCANNING EXTERNAL SOURCES";
-
-      activity.textContent =
-        "WEB SEARCH";
-
-      soundSearch();
-
-      addTarget(
-        "EUROPE"
-      );
-
-      addTarget(
-        "USA"
-      );
-
-      addTarget(
-        "ASIA"
-      );
-
-    }else{
-
-      setTile(
-        "process",
-        "PROCESSING...",
-        "active"
-      );
-
-      processingTitle.textContent =
-        "PROCESSING";
-
-      processingSub.textContent =
-        "GENERATING RESPONSE";
-
-    }
-
-  },550);
-
-}
-
-function finishAnalysis(isWeb){
-
-  setTile(
-    "analysis",
-    "COMPLETE",
-    "done"
-  );
-
-  if(isWeb){
-
-    setTile(
-      "web",
-      "COMPLETE",
-      "done"
-    );
-
-    setTile(
-      "source",
-      "FOUND",
-      "done"
-    );
-
-  }
-
-  setTile(
-    "process",
-    "COMPLETE",
-    "done"
-  );
-
-  processingTitle.textContent =
-    "COMPLETE";
-
-  processingSub.textContent =
-    "INTELLIGENCE PROCESSING FINISHED";
-
-  mapStatus.textContent =
-    "SYSTEM READY";
-
-  activity.textContent =
-    "STANDBY";
-
-  soundComplete();
-
-  setTimeout(()=>{
-
-    processing.classList.remove(
-      "active"
-    );
-
-  },650);
-
-}
-
-/* =========================================================
-   CHAT
-   ========================================================= */
-
-function addMessage(
-  text,
-  type="assistant"
-){
-
-  const div =
+  const line=
     document.createElement("div");
 
-  div.className =
-    "message " +
-    (type === "user"
-      ? "user"
-      : type === "system"
-      ? "system"
-      : "");
+  line.className="logLine";
 
-  div.textContent =
-    text;
+  line.textContent=
+    "› "+text;
 
-  chat.appendChild(div);
+  log.prepend(line);
 
-  chat.scrollTop =
-    chat.scrollHeight;
+  while(log.children.length>5)
+    log.lastChild.remove();
 
 }
 
-function detectWeb(message){
 
-  const words = [
+function setProgress(value,text){
+
+  const v=
+    Math.max(
+      0,
+      Math.min(100,value)
+    );
+
+  progressFill.style.width=v+"%";
+  percent.textContent=
+    Math.round(v)+"%";
+
+  if(text)
+    operation.textContent=text;
+
+}
+
+
+function activate(tile,value){
+
+  tile.classList.add("active");
+
+  if(value!==undefined){
+
+    const el=
+      tile.querySelector(".tileValue");
+
+    if(el)
+      el.textContent=value;
+
+  }
+
+}
+
+
+function deactivate(tile){
+
+  tile.classList.remove("active");
+
+}
+
+
+function createHits(count=3){
+
+  for(let i=0;i<count;i++){
+
+    setTimeout(()=>{
+
+      const hit=
+        document.createElement("div");
+
+      hit.className="hit";
+
+      hit.style.left=
+        (15+Math.random()*70)+"%";
+
+      hit.style.top=
+        (25+Math.random()*38)+"%";
+
+      document.body.appendChild(hit);
+
+      hit.animate(
+        [
+          {
+            transform:"scale(.2)",
+            opacity:0
+          },
+          {
+            transform:"scale(1)",
+            opacity:1
+          },
+          {
+            transform:"scale(3)",
+            opacity:0
+          }
+        ],
+        {
+          duration:900,
+          easing:"ease-out"
+        }
+      );
+
+      setTimeout(
+        ()=>hit.remove(),
+        950
+      );
+
+    },i*220);
+
+  }
+
+}
+
+
+/* =========================================================
+   CLOCK
+   ========================================================= */
+
+function updateClock(){
+
+  const now=new Date();
+
+  document.getElementById("clock")
+    .textContent=
+      now.toLocaleTimeString(
+        "de-DE",
+        {
+          hour12:false
+        }
+      );
+
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+
+/* =========================================================
+   PREPARE SEARCH VISUAL
+   ========================================================= */
+
+function startSearchVisual(){
+
+  processing.classList.add("show");
+
+  processingTitle.textContent=
+    "ANALYZING";
+
+  processingSub.textContent=
+    "INITIALIZING LUCEN CORE";
+
+  setProgress(
+    8,
+    "INITIALIZING"
+  );
+
+  activate(
+    tileAnalysis,
+    "SCANNING"
+  );
+
+  activate(
+    tileProcess,
+    "ACTIVE"
+  );
+
+  addLog(
+    "Neural core initialized"
+  );
+
+  setTimeout(()=>{
+
+    processingTitle.textContent=
+      "SEARCHING";
+
+    processingSub.textContent=
+      "GLOBAL WEB INTELLIGENCE";
+
+    setProgress(
+      32,
+      "GLOBAL SEARCH"
+    );
+
+    activate(
+      tileWeb,
+      "SEARCHING"
+    );
+
+    webValue.textContent=
+      "ACTIVE";
+
+    addLog(
+      "Global web search started"
+    );
+
+    for(let i=0;i<5;i++)
+      setTimeout(createTarget,i*180);
+
+    for(let i=0;i<15;i++)
+      setTimeout(spawnPacket,i*120);
+
+  },450);
+
+
+  setTimeout(()=>{
+
+    processingTitle.textContent=
+      "PROCESSING";
+
+    processingSub.textContent=
+      "SOURCE ANALYSIS";
+
+    setProgress(
+      58,
+      "PROCESSING SOURCES"
+    );
+
+    activate(
+      tileSources,
+      "SCANNING"
+    );
+
+    sourceValue.textContent=
+      Math.floor(
+        3+Math.random()*12
+      );
+
+    addLog(
+      "Sources being analyzed"
+    );
+
+    createHits(5);
+
+  },1050);
+
+
+  setTimeout(()=>{
+
+    setProgress(
+      78,
+      "CROSS CHECKING"
+    );
+
+    addLog(
+      "Cross-source verification active"
+    );
+
+  },1600);
+
+}
+
+
+function finishSearchVisual(){
+
+  processingTitle.textContent=
+    "COMPLETE";
+
+  processingSub.textContent=
+    "LUCEN RESPONSE READY";
+
+  setProgress(
+    100,
+    "COMPLETE"
+  );
+
+  analysisValue.textContent=
+    "COMPLETE";
+
+  webValue.textContent=
+    "ONLINE";
+
+  processValue.textContent=
+    "COMPLETE";
+
+  addLog(
+    "Analysis completed successfully"
+  );
+
+  createHits(3);
+
+  setTimeout(()=>{
+
+    processing.classList.remove("show");
+
+    deactivate(tileAnalysis);
+    deactivate(tileWeb);
+    deactivate(tileSources);
+    deactivate(tileProcess);
+
+  },900);
+
+}
+
+
+/* =========================================================
+   LUCEN BACKEND
+   ========================================================= */
+
+async function askLucen(message){
+
+  if(!message.trim())
+    return;
+
+  startSearchVisual();
+
+  const lower=
+    message.toLowerCase();
+
+  const looksLikeSearch=[
     "suche",
     "such",
     "internet",
     "web",
     "recherche",
-    "recherchiere",
     "aktuell",
-    "aktuelle",
-    "aktuellen",
     "heute",
     "jetzt",
     "news",
     "nachrichten",
     "preis",
-    "preise",
     "wetter",
-    "quelle",
-    "quellen",
-    "öffnungszeiten"
-  ];
-
-  const lower =
-    message.toLowerCase();
-
-  return words.some(
-    word => lower.includes(word)
+    "öffnungszeiten",
+    "quelle"
+  ].some(
+    x=>lower.includes(x)
   );
-
-}
-
-/* =========================================================
-   SEND
-   ========================================================= */
-
-let busy = false;
-
-async function sendMessage(){
-
-  if(busy) return;
-
-  const message =
-    input.value.trim();
-
-  if(!message) return;
-
-  busy = true;
-
-  input.value = "";
-
-  addMessage(
-    message,
-    "user"
-  );
-
-  const isWeb =
-    detectWeb(message);
-
-  beginAnalysis(isWeb);
-
-  const start =
-    performance.now();
 
   try{
 
-    const response =
+    const response=
       await fetch(
-        API,
+        "/.netlify/functions/lucen-v2",
         {
           method:"POST",
           headers:{
@@ -1582,413 +1444,138 @@ async function sendMessage(){
         }
       );
 
-    const elapsed =
-      Math.round(
-        performance.now() - start
-      );
-
-    latency.textContent =
-      elapsed + " MS";
-
-    const data =
+    const data=
       await response.json();
 
-    if(!response.ok || data.ok === false){
-
+    if(!response.ok)
       throw new Error(
-        data.error ||
-        data.reply ||
-        "Verbindung fehlgeschlagen."
+        data?.error ||
+        "LUCEN Backend Fehler"
       );
+
+    setProgress(
+      92,
+      "GENERATING RESPONSE"
+    );
+
+    addLog(
+      "Response synthesis active"
+    );
+
+    if(data?.analysis){
+
+      const modules=
+        data.analysis.modules ||
+        [];
+
+      for(
+        const module of modules
+      ){
+
+        addLog(
+          module
+        );
+
+      }
 
     }
 
-    if(
-      data.type === "research" ||
-      data.intent === "research"
-    ){
+    finishSearchVisual();
 
-      setTile(
-        "web",
-        "SOURCE DATA RECEIVED",
-        "active"
-      );
-
-      setTile(
-        "source",
-        "PROCESSING...",
-        "active"
-      );
-
-      addTarget(
-        "SWITZERLAND"
-      );
-
-      soundHit();
-
-      await new Promise(
-        resolve =>
-          setTimeout(resolve,300)
-      );
-
-    }
-
-    setTile(
-      "process",
-      "GENERATING...",
-      "active"
-    );
-
-    addMessage(
-      data.reply ||
-      "Verstanden."
-    );
-
-    finishAnalysis(isWeb);
+    return data?.reply ||
+      "Keine Antwort erhalten.";
 
   }catch(error){
 
-    console.error(error);
-
-    setTile(
-      "process",
-      "ERROR",
-      "error"
-    );
-
-    processingTitle.textContent =
-      "CONNECTION ERROR";
-
-    processingSub.textContent =
-      error.message ||
-      "Backend nicht erreichbar";
-
-    mapStatus.textContent =
-      "CONNECTION ERROR";
-
-    activity.textContent =
+    processingTitle.textContent=
       "ERROR";
 
-    addMessage(
-      "Verbindung momentan nicht möglich. " +
-      (error.message || ""),
-      "system"
+    processingSub.textContent=
+      error.message ||
+      "Connection failure";
+
+    operation.textContent=
+      "SYSTEM ERROR";
+
+    addLog(
+      "ERROR: "+
+      (error.message || "Unknown")
     );
 
-    tone(
-      180,
-      .25,
-      "sawtooth",
-      .025
+    progressFill.style.width="0%";
+    percent.textContent="ERR";
+
+    return(
+      "Ich konnte LUCEN gerade nicht erreichen. "+
+      (error.message || "")
     );
-
-    setTimeout(()=>{
-      processing.classList.remove(
-        "active"
-      );
-    },1200);
-
-  }finally{
-
-    busy = false;
 
   }
 
 }
 
+
 /* =========================================================
-   EVENTS
+   SEND
    ========================================================= */
 
-sendBtn.addEventListener(
+async function sendMessage(){
+
+  const message=
+    input.value.trim();
+
+  if(!message)
+    return;
+
+  input.value="";
+
+  addLog(
+    "USER INPUT RECEIVED"
+  );
+
+  const answer=
+    await askLucen(message);
+
+  /*
+   * Antwort anzeigen
+   * Die vorhandene Oberfläche kann später
+   * noch um eine echte Chat-Historie erweitert werden.
+   */
+
+  addLog(
+    "LUCEN: "+
+    String(answer).slice(0,100)
+  );
+
+}
+
+send.addEventListener(
   "click",
   sendMessage
 );
 
 input.addEventListener(
   "keydown",
-  event => {
+  e=>{
 
-    if(
-      event.key === "Enter"
-    ){
-      event.preventDefault();
+    if(e.key==="Enter")
       sendMessage();
-    }
 
   }
 );
 
-clearBtn.addEventListener(
-  "click",
-  ()=>{
-
-    chat.innerHTML = `
-      <div class="message system">
-        LUCEN CORE — SESSION CLEARED
-      </div>
-    `;
-
-    resetTiles();
-
-    targets = [];
-    packets = [];
-
-    activity.textContent =
-      "STANDBY";
-
-    mapStatus.textContent =
-      "SYSTEM READY";
-
-  }
-);
 
 /* =========================================================
-   VOICE
-   =========================================================
-
-   WICHTIG:
-   Wir verändern NICHT deine funktionierende
-   realtime.js-Verbindung.
-
-   Der Button ruft weiterhin deine bestehende
-   Realtime-Funktion auf.
+   INIT
    ========================================================= */
 
-let pc = null;
-let dc = null;
-let localStream = null;
-let remoteAudio = null;
-
-async function startVoice(){
-
-  if(pc){
-    stopVoice();
-    return;
-  }
-
-  try{
-
-    audio();
-
-    localStream =
-      await navigator.mediaDevices
-        .getUserMedia({
-          audio:true
-        });
-
-    pc =
-      new RTCPeerConnection();
-
-    remoteAudio =
-      document.createElement("audio");
-
-    remoteAudio.autoplay = true;
-    remoteAudio.playsInline = true;
-
-    document.body.appendChild(
-      remoteAudio
-    );
-
-    pc.ontrack =
-      event => {
-
-        if(event.streams?.[0]){
-          remoteAudio.srcObject =
-            event.streams[0];
-        }
-
-      };
-
-    localStream
-      .getTracks()
-      .forEach(
-        track =>
-          pc.addTrack(
-            track,
-            localStream
-          )
-      );
-
-    dc =
-      pc.createDataChannel(
-        "oai-events"
-      );
-
-    dc.onopen =
-      () => {
-
-        voiceBtn.classList.add(
-          "active"
-        );
-
-        voiceBtn.textContent =
-          "●";
-
-        mapStatus.textContent =
-          "VOICE ONLINE";
-
-        activity.textContent =
-          "LISTENING";
-
-        setTile(
-          "analysis",
-          "VOICE ACTIVE",
-          "active"
-        );
-
-        soundStart();
-
-      };
-
-    const offer =
-      await pc.createOffer();
-
-    await pc.setLocalDescription(
-      offer
-    );
-
-    const response =
-      await fetch(
-        "/.netlify/functions/realtime",
-        {
-          method:"POST",
-          headers:{
-            "Content-Type":
-              "application/sdp"
-          },
-          body:
-            pc.localDescription.sdp
-        }
-      );
-
-    if(!response.ok){
-
-      const text =
-        await response.text();
-
-      throw new Error(
-        text ||
-        "Realtime-Verbindung fehlgeschlagen."
-      );
-
-    }
-
-    const answer =
-      await response.text();
-
-    await pc.setRemoteDescription({
-      type:"answer",
-      sdp:answer
-    });
-
-  }catch(error){
-
-    console.error(
-      "VOICE ERROR:",
-      error
-    );
-
-    addMessage(
-      "Voice konnte nicht gestartet werden.",
-      "system"
-    );
-
-    stopVoice();
-
-  }
-
-}
-
-function stopVoice(){
-
-  if(dc){
-    try{
-      dc.close();
-    }catch{}
-  }
-
-  if(pc){
-    try{
-      pc.close();
-    }catch{}
-  }
-
-  if(localStream){
-
-    localStream
-      .getTracks()
-      .forEach(
-        track =>
-          track.stop()
-      );
-
-  }
-
-  if(remoteAudio){
-
-    try{
-      remoteAudio.remove();
-    }catch{}
-
-  }
-
-  pc = null;
-  dc = null;
-  localStream = null;
-  remoteAudio = null;
-
-  voiceBtn.classList.remove(
-    "active"
-  );
-
-  voiceBtn.textContent =
-    "◉";
-
-  mapStatus.textContent =
-    "SYSTEM READY";
-
-  activity.textContent =
-    "STANDBY";
-
-  resetTiles();
-
-}
-
-voiceBtn.addEventListener(
-  "click",
-  startVoice
+addLog(
+  "LUCEN SYSTEM ONLINE"
 );
 
-/* =========================================================
-   INITIALIZATION
-   ========================================================= */
-
-resetTiles();
-
-setTimeout(()=>{
-
-  addTarget(
-    "EUROPE"
-  );
-
-},500);
-
-setTimeout(()=>{
-
-  addTarget(
-    "USA"
-  );
-
-},1000);
-
-setTimeout(()=>{
-
-  addTarget(
-    "ASIA"
-  );
-
-},1500);
+addLog(
+  "Awaiting command..."
+);
 
 </script>
 
