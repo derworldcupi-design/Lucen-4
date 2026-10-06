@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#02070d">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LUCEN // AI CORE</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>LUCEN // PERSONAL INTELLIGENCE SYSTEM</title>
 
 <style>
 *{
@@ -18,19 +20,17 @@ html,body{
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#02070d;
+  background:#01050a;
   color:#bcefff;
-  font-family:
-    -apple-system,BlinkMacSystemFont,
-    "SF Pro Display","Segoe UI",sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
 }
 
 body{
   position:relative;
   background:
-    radial-gradient(circle at 50% 45%,rgba(0,190,255,.09),transparent 38%),
-    radial-gradient(circle at 50% 100%,rgba(0,110,255,.08),transparent 45%),
-    #02070d;
+    radial-gradient(circle at 50% 43%,rgba(0,210,255,.10),transparent 32%),
+    radial-gradient(circle at 50% 100%,rgba(0,100,255,.10),transparent 48%),
+    #01050a;
 }
 
 canvas{
@@ -40,133 +40,177 @@ canvas{
   height:100%;
 }
 
-#stars{
-  z-index:0;
-}
-
-#world{
-  z-index:1;
-}
-
-#fx{
-  z-index:2;
-  pointer-events:none;
-}
+#stars{z-index:0}
+#world{z-index:1}
+#fx{z-index:2;pointer-events:none}
 
 .scanlines{
   position:absolute;
   inset:0;
-  z-index:20;
+  z-index:40;
   pointer-events:none;
-  opacity:.12;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 3px,
-      rgba(120,220,255,.08) 4px
-    );
+  opacity:.10;
+  background:repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(120,220,255,.10) 4px
+  );
 }
 
 .vignette{
   position:absolute;
   inset:0;
-  z-index:21;
+  z-index:41;
   pointer-events:none;
-  background:
-    radial-gradient(
-      ellipse at center,
-      transparent 45%,
-      rgba(0,0,0,.72) 100%
-    );
+  background:radial-gradient(
+    ellipse at center,
+    transparent 35%,
+    rgba(0,0,0,.78) 100%
+  );
+}
+
+.noise{
+  position:absolute;
+  inset:0;
+  z-index:42;
+  pointer-events:none;
+  opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
 }
 
 .hud{
   position:absolute;
   inset:0;
   z-index:10;
-  display:flex;
-  flex-direction:column;
-  padding:
-    max(14px,env(safe-area-inset-top))
-    14px
-    max(14px,env(safe-area-inset-bottom));
   pointer-events:none;
+  padding:
+    max(12px,env(safe-area-inset-top))
+    12px
+    max(10px,env(safe-area-inset-bottom));
 }
 
-.top{
+.topbar{
+  position:absolute;
+  top:max(12px,env(safe-area-inset-top));
+  left:12px;
+  right:12px;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  pointer-events:auto;
 }
 
 .brand{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:9px;
 }
 
 .logo{
   width:40px;
   height:40px;
-  border:1px solid rgba(100,220,255,.65);
+  border:1px solid rgba(100,230,255,.65);
   border-radius:50%;
   display:grid;
   place-items:center;
   box-shadow:
     0 0 15px rgba(0,200,255,.25),
-    inset 0 0 12px rgba(0,200,255,.12);
-  animation:logoPulse 2.5s infinite;
+    inset 0 0 14px rgba(0,200,255,.15);
+  animation:logoPulse 2.4s infinite;
 }
 
-.logo::after{
+.logo:before{
   content:"";
-  width:12px;
-  height:12px;
+  width:18px;
+  height:18px;
+  border:1px solid rgba(130,245,255,.8);
   border-radius:50%;
-  background:#8cecff;
-  box-shadow:0 0 18px #28d9ff;
+}
+
+.logo:after{
+  content:"";
+  position:absolute;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#c4faff;
+  box-shadow:0 0 15px #2bdcff;
 }
 
 @keyframes logoPulse{
   0%,100%{transform:scale(1)}
-  50%{transform:scale(1.06)}
+  50%{transform:scale(1.07)}
 }
 
 .title{
-  font-size:20px;
-  font-weight:700;
+  color:#e0fbff;
+  font-size:19px;
+  font-weight:800;
   letter-spacing:5px;
-  color:#d9f9ff;
+  text-shadow:0 0 12px rgba(50,220,255,.35);
 }
 
 .subtitle{
-  font-size:8px;
-  letter-spacing:3px;
-  opacity:.55;
-  margin-top:3px;
+  margin-top:2px;
+  font-size:7px;
+  letter-spacing:2.4px;
+  opacity:.48;
 }
 
 .status{
   text-align:right;
-  font-size:9px;
-  letter-spacing:2px;
+  font-size:8px;
+  letter-spacing:1.7px;
+  line-height:15px;
 }
 
 .statusDot{
   display:inline-block;
-  width:7px;
-  height:7px;
+  width:6px;
+  height:6px;
   border-radius:50%;
-  background:#46f6c5;
-  box-shadow:0 0 12px #46f6c5;
-  margin-right:5px;
-  animation:statusPulse 1.2s infinite;
+  background:#4affcf;
+  box-shadow:0 0 11px #4affcf;
+  animation:statusPulse 1.1s infinite;
 }
 
 @keyframes statusPulse{
-  50%{opacity:.3}
+  50%{opacity:.25}
+}
+
+.corner{
+  position:absolute;
+  width:38px;
+  height:38px;
+  opacity:.4;
+}
+
+.corner.tl{
+  top:70px;
+  left:12px;
+  border-top:1px solid #5edfff;
+  border-left:1px solid #5edfff;
+}
+
+.corner.tr{
+  top:70px;
+  right:12px;
+  border-top:1px solid #5edfff;
+  border-right:1px solid #5edfff;
+}
+
+.corner.bl{
+  bottom:150px;
+  left:12px;
+  border-bottom:1px solid #5edfff;
+  border-left:1px solid #5edfff;
+}
+
+.corner.br{
+  bottom:150px;
+  right:12px;
+  border-bottom:1px solid #5edfff;
+  border-right:1px solid #5edfff;
 }
 
 .coreArea{
@@ -174,58 +218,60 @@ canvas{
   left:50%;
   top:43%;
   transform:translate(-50%,-50%);
-  width:min(72vw,340px);
+  width:min(82vw,370px);
   aspect-ratio:1;
-  pointer-events:none;
 }
 
 .coreGlow{
   position:absolute;
-  inset:20%;
+  inset:18%;
   border-radius:50%;
   background:radial-gradient(
     circle,
-    rgba(0,220,255,.35),
-    rgba(0,130,255,.12) 35%,
+    rgba(0,230,255,.40),
+    rgba(0,140,255,.12) 38%,
     transparent 70%
   );
-  filter:blur(12px);
-  animation:coreGlow 1.5s infinite alternate;
+  filter:blur(16px);
+  animation:glow 1.4s ease-in-out infinite alternate;
 }
 
-@keyframes coreGlow{
-  from{transform:scale(.85);opacity:.55}
-  to{transform:scale(1.15);opacity:1}
+@keyframes glow{
+  from{transform:scale(.82);opacity:.45}
+  to{transform:scale(1.18);opacity:1}
 }
 
-.ring{
+.coreRing{
   position:absolute;
-  inset:8%;
   border-radius:50%;
-  border:1px solid rgba(100,220,255,.22);
-  box-shadow:
-    0 0 30px rgba(0,190,255,.12),
-    inset 0 0 30px rgba(0,190,255,.06);
+  border:1px solid rgba(85,220,255,.22);
 }
 
-.ring.r1{
-  animation:spin 16s linear infinite;
-  border-top-color:#54e7ff;
-  border-bottom-color:rgba(84,231,255,.05);
+.r1{
+  inset:3%;
+  border-top-color:#65eaff;
+  border-right-color:rgba(80,220,255,.05);
+  animation:spin 18s linear infinite;
 }
 
-.ring.r2{
-  inset:16%;
-  animation:spinReverse 11s linear infinite;
-  border-left-color:#59b9ff;
-  border-right-color:rgba(89,185,255,.05);
+.r2{
+  inset:8%;
+  border-left-color:#3db8ff;
+  border-bottom-color:rgba(60,180,255,.05);
+  animation:spinReverse 13s linear infinite;
 }
 
-.ring.r3{
-  inset:26%;
-  animation:spin 7s linear infinite;
-  border-top-color:#b3f4ff;
-  border-bottom-color:#178bc0;
+.r3{
+  inset:15%;
+  border-top-color:#b7f7ff;
+  border-bottom-color:#1486bb;
+  animation:spin 8s linear infinite;
+}
+
+.r4{
+  inset:24%;
+  border-left-color:#75efff;
+  animation:spinReverse 5s linear infinite;
 }
 
 @keyframes spin{
@@ -236,122 +282,178 @@ canvas{
   to{transform:rotate(-360deg)}
 }
 
+.tickRing{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  animation:spin 30s linear infinite;
+}
+
+.tickRing:before,
+.tickRing:after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:-2px;
+  width:1px;
+  height:11px;
+  background:#6ceaff;
+  box-shadow:0 0 8px #6ceaff;
+}
+
+.tickRing:after{
+  top:auto;
+  bottom:-2px;
+}
+
 .core{
   position:absolute;
-  inset:35%;
+  inset:34%;
   border-radius:50%;
-  border:2px solid rgba(130,240,255,.9);
-  box-shadow:
-    0 0 15px rgba(0,210,255,.9),
-    0 0 45px rgba(0,150,255,.5),
-    inset 0 0 25px rgba(0,220,255,.45);
+  border:2px solid rgba(160,247,255,.9);
   background:radial-gradient(
-    circle,
-    rgba(150,245,255,.85),
-    rgba(0,150,255,.25) 35%,
-    rgba(0,20,40,.8) 70%
+    circle at 42% 38%,
+    rgba(220,255,255,.9),
+    rgba(20,210,255,.48) 13%,
+    rgba(0,80,130,.25) 42%,
+    rgba(0,10,20,.9) 72%
   );
-  animation:coreBeat 1.8s infinite;
+  box-shadow:
+    0 0 14px #36dfff,
+    0 0 40px rgba(0,200,255,.55),
+    0 0 90px rgba(0,100,255,.22),
+    inset 0 0 30px rgba(100,240,255,.45);
+  animation:coreBeat 1.5s ease-in-out infinite;
 }
 
 @keyframes coreBeat{
-  0%,100%{transform:scale(.96)}
-  50%{transform:scale(1.05)}
+  0%,100%{transform:scale(.95)}
+  50%{transform:scale(1.07)}
+}
+
+.core:before{
+  content:"";
+  position:absolute;
+  inset:17%;
+  border:1px solid rgba(190,250,255,.8);
+  border-radius:50%;
+  animation:spinReverse 4s linear infinite;
+}
+
+.core:after{
+  content:"";
+  position:absolute;
+  left:15%;
+  right:15%;
+  top:50%;
+  height:1px;
+  background:#bdfaff;
+  box-shadow:0 0 12px #4be5ff;
 }
 
 .coreText{
   position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
+  z-index:3;
+  inset:0;
+  display:grid;
+  place-items:center;
   text-align:center;
-  color:white;
-  text-shadow:0 0 12px #22d8ff;
-  font-size:10px;
-  letter-spacing:3px;
-  font-weight:700;
+  font-size:7px;
+  letter-spacing:2px;
+  color:#dfffff;
+  text-shadow:0 0 12px #27ddff;
 }
 
 .coreText strong{
   display:block;
-  font-size:18px;
+  font-size:15px;
   letter-spacing:4px;
+}
+
+.mode{
+  position:absolute;
+  left:50%;
+  top:calc(43% + min(41vw,185px));
+  transform:translateX(-50%);
+  width:240px;
+  text-align:center;
+  font-family:monospace;
+  font-size:8px;
+  letter-spacing:2px;
+  opacity:.65;
 }
 
 .progress{
   position:absolute;
   left:50%;
-  bottom:25%;
+  top:calc(43% + min(46vw,208px));
   transform:translateX(-50%);
-  width:min(270px,70vw);
-  text-align:center;
+  width:min(290px,76vw);
 }
 
-.progressLabel{
+.progressHead{
   display:flex;
   justify-content:space-between;
-  font-size:8px;
-  letter-spacing:2px;
-  opacity:.7;
   margin-bottom:6px;
+  font-family:monospace;
+  font-size:7px;
+  letter-spacing:1.5px;
+  opacity:.7;
 }
 
 .progressBar{
   height:3px;
-  background:rgba(100,220,255,.12);
-  overflow:hidden;
   border-radius:5px;
+  overflow:hidden;
+  background:rgba(100,220,255,.10);
 }
 
 .progressFill{
-  width:0%;
   height:100%;
-  background:#72eaff;
-  box-shadow:0 0 12px #38dfff;
-  transition:width .25s ease;
+  width:0%;
+  background:#74ecff;
+  box-shadow:0 0 13px #35dcff;
+  transition:width .22s ease;
 }
 
 .tiles{
   position:absolute;
   left:12px;
   right:12px;
-  bottom:115px;
+  bottom:114px;
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:6px;
+  gap:5px;
 }
 
 .tile{
-  min-height:48px;
-  padding:7px 5px;
-  border:1px solid rgba(100,220,255,.15);
-  background:rgba(0,20,35,.42);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  overflow:hidden;
   position:relative;
-}
-
-.tile::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:-100%;
-  width:100%;
-  height:1px;
-  background:#5de9ff;
-  box-shadow:0 0 8px #5de9ff;
+  min-height:45px;
+  padding:6px 5px;
+  border:1px solid rgba(100,220,255,.14);
+  background:rgba(0,15,27,.53);
+  backdrop-filter:blur(9px);
+  -webkit-backdrop-filter:blur(9px);
+  overflow:hidden;
 }
 
 .tile.active{
-  border-color:rgba(100,230,255,.65);
+  border-color:rgba(100,235,255,.7);
   box-shadow:
-    0 0 16px rgba(0,190,255,.16),
-    inset 0 0 12px rgba(0,190,255,.05);
+    0 0 18px rgba(0,200,255,.16),
+    inset 0 0 15px rgba(0,200,255,.06);
 }
 
-.tile.active::before{
-  animation:tileScan .8s linear infinite;
+.tile.active:before{
+  content:"";
+  position:absolute;
+  left:-100%;
+  top:0;
+  width:100%;
+  height:1px;
+  background:#76eeff;
+  box-shadow:0 0 10px #4adfff;
+  animation:tileScan .7s linear infinite;
 }
 
 @keyframes tileScan{
@@ -359,30 +461,32 @@ canvas{
 }
 
 .tileName{
-  font-size:7px;
-  letter-spacing:1.5px;
-  opacity:.5;
+  font-family:monospace;
+  font-size:6px;
+  letter-spacing:1.3px;
+  opacity:.42;
 }
 
 .tileValue{
   margin-top:4px;
-  font-size:9px;
+  font-family:monospace;
+  font-size:8px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
-.log{
+.activity{
   position:absolute;
-  left:14px;
-  right:14px;
-  bottom:65px;
-  height:40px;
+  left:12px;
+  right:12px;
+  bottom:64px;
+  height:42px;
   overflow:hidden;
   font-family:monospace;
-  font-size:8px;
-  line-height:13px;
-  opacity:.55;
+  font-size:7px;
+  line-height:12px;
+  opacity:.58;
   text-shadow:0 0 8px rgba(80,220,255,.5);
 }
 
@@ -392,70 +496,100 @@ canvas{
   text-overflow:ellipsis;
 }
 
+.chat{
+  position:absolute;
+  left:12px;
+  right:12px;
+  top:82px;
+  max-height:125px;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+.message{
+  max-width:92%;
+  margin-bottom:5px;
+  padding:7px 9px;
+  border-left:2px solid rgba(70,220,255,.55);
+  background:rgba(0,18,30,.50);
+  backdrop-filter:blur(7px);
+  font-size:11px;
+  line-height:15px;
+  animation:messageIn .25s ease-out;
+}
+
+.message.user{
+  margin-left:auto;
+  border-left:0;
+  border-right:2px solid rgba(100,245,210,.5);
+  text-align:right;
+}
+
+@keyframes messageIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
 .inputArea{
   position:absolute;
-  left:10px;
-  right:10px;
-  bottom:max(8px,env(safe-area-inset-bottom));
+  left:9px;
+  right:9px;
+  bottom:max(7px,env(safe-area-inset-bottom));
   display:flex;
   gap:6px;
   pointer-events:auto;
 }
 
 .input{
-  flex:1;
   min-width:0;
-  height:48px;
-  border:1px solid rgba(100,220,255,.3);
+  flex:1;
+  height:47px;
+  padding:0 13px;
   border-radius:12px;
+  border:1px solid rgba(100,220,255,.28);
   outline:none;
-  background:rgba(2,15,25,.78);
-  color:#d8faff;
-  padding:0 14px;
+  background:rgba(1,13,23,.87);
+  color:#dcfbff;
   font-size:14px;
   box-shadow:
-    0 0 18px rgba(0,150,255,.08),
-    inset 0 0 15px rgba(0,150,255,.04);
+    inset 0 0 15px rgba(0,160,255,.04),
+    0 0 15px rgba(0,150,255,.07);
 }
 
 .input::placeholder{
-  color:rgba(180,230,245,.35);
+  color:rgba(180,230,245,.32);
 }
 
 .btn{
-  width:48px;
-  height:48px;
-  border:1px solid rgba(100,220,255,.35);
+  width:47px;
+  height:47px;
+  flex:none;
   border-radius:12px;
-  background:rgba(2,20,32,.85);
-  color:#bcefff;
+  border:1px solid rgba(100,220,255,.32);
+  background:rgba(1,17,29,.90);
+  color:#bff6ff;
   font-size:18px;
-  box-shadow:0 0 15px rgba(0,170,255,.08);
 }
 
 .btn:active{
-  transform:scale(.94);
-}
-
-.voice{
-  border-color:rgba(75,240,210,.45);
+  transform:scale(.92);
 }
 
 .voice.live{
-  background:rgba(0,90,80,.4);
   border-color:#4affd1;
-  box-shadow:0 0 25px rgba(50,255,210,.25);
-  animation:voicePulse 1s infinite;
+  background:rgba(0,100,85,.35);
+  box-shadow:0 0 30px rgba(50,255,210,.28);
+  animation:voicePulse .9s infinite;
 }
 
 @keyframes voicePulse{
-  50%{box-shadow:0 0 40px rgba(50,255,210,.45)}
+  50%{box-shadow:0 0 45px rgba(50,255,210,.52)}
 }
 
 .processing{
   position:absolute;
   inset:0;
-  z-index:30;
+  z-index:35;
   display:none;
   place-items:center;
   pointer-events:none;
@@ -465,47 +599,83 @@ canvas{
   display:grid;
 }
 
-.processingText{
+.processingCenter{
+  width:220px;
   text-align:center;
-  letter-spacing:4px;
-  font-size:9px;
-  text-shadow:0 0 15px #38dfff;
 }
 
-.processingText strong{
-  display:block;
-  font-size:24px;
-  margin-bottom:8px;
+.processingTitle{
+  font-size:25px;
+  font-weight:700;
   letter-spacing:6px;
+  text-shadow:0 0 20px #2ddcff;
+}
+
+.processingSub{
+  margin-top:9px;
+  font-family:monospace;
+  font-size:7px;
+  letter-spacing:2px;
+  opacity:.65;
+}
+
+.pulseCircle{
+  width:85px;
+  height:85px;
+  margin:0 auto 18px;
+  border-radius:50%;
+  border:1px solid rgba(90,230,255,.45);
+  box-shadow:
+    0 0 20px rgba(0,210,255,.15),
+    inset 0 0 20px rgba(0,210,255,.08);
+  animation:processingPulse 1s infinite;
+}
+
+@keyframes processingPulse{
+  0%{transform:scale(.8);opacity:.35}
+  50%{transform:scale(1.08);opacity:1}
+  100%{transform:scale(.8);opacity:.35}
 }
 
 .hit{
   position:absolute;
-  width:8px;
-  height:8px;
+  z-index:25;
+  width:7px;
+  height:7px;
   border-radius:50%;
-  border:1px solid #a9f5ff;
-  box-shadow:0 0 18px #28dfff;
+  border:1px solid #c4faff;
+  box-shadow:0 0 18px #24ddff;
   pointer-events:none;
-  z-index:5;
+}
+
+.flash{
+  position:absolute;
+  inset:0;
+  z-index:34;
+  pointer-events:none;
+  background:rgba(80,230,255,.12);
+  opacity:0;
+}
+
+.flash.go{
+  animation:flash .35s ease-out;
+}
+
+@keyframes flash{
+  0%{opacity:1}
+  100%{opacity:0}
 }
 
 @media(max-width:390px){
-  .tiles{
-    bottom:116px;
-  }
+  .title{font-size:17px}
+  .tiles{bottom:113px;gap:4px}
+  .tile{min-height:42px;padding:5px 4px}
+  .tileValue{font-size:7px}
+  .chat{top:78px}
+}
 
-  .tile{
-    min-height:43px;
-  }
-
-  .tileValue{
-    font-size:8px;
-  }
-
-  .title{
-    font-size:17px;
-  }
+@media(min-height:850px){
+  .chat{top:95px}
 }
 </style>
 </head>
@@ -518,10 +688,12 @@ canvas{
 
 <div class="scanlines"></div>
 <div class="vignette"></div>
+<div class="noise"></div>
+<div class="flash" id="flash"></div>
 
 <div class="hud">
 
-  <div class="top">
+  <div class="topbar">
 
     <div class="brand">
       <div class="logo"></div>
@@ -533,34 +705,48 @@ canvas{
     </div>
 
     <div class="status">
-      <span class="statusDot"></span>
-      ONLINE
+      <span class="statusDot"></span> ONLINE
       <br>
       <span id="clock">--:--:--</span>
     </div>
 
   </div>
 
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="chat" id="chat"></div>
+
   <div class="coreArea">
 
     <div class="coreGlow"></div>
 
-    <div class="ring r1"></div>
-    <div class="ring r2"></div>
-    <div class="ring r3"></div>
+    <div class="coreRing r1"></div>
+    <div class="coreRing r2"></div>
+    <div class="coreRing r3"></div>
+    <div class="coreRing r4"></div>
+    <div class="tickRing"></div>
 
     <div class="core">
       <div class="coreText">
-        <strong>LUCEN</strong>
-        AI CORE
+        <div>
+          <strong>LUCEN</strong>
+          AI CORE
+        </div>
       </div>
     </div>
 
   </div>
 
+  <div class="mode" id="mode">
+    SYSTEM READY
+  </div>
+
   <div class="progress">
 
-    <div class="progressLabel">
+    <div class="progressHead">
       <span id="operation">SYSTEM READY</span>
       <span id="percent">0%</span>
     </div>
@@ -604,7 +790,7 @@ canvas{
     </div>
 
     <div class="tile">
-      <div class="tileName">CORE</div>
+      <div class="tileName">AI CORE</div>
       <div class="tileValue">GPT ACTIVE</div>
     </div>
 
@@ -615,7 +801,7 @@ canvas{
 
   </div>
 
-  <div class="log" id="log"></div>
+  <div class="activity" id="activity"></div>
 
   <div class="inputArea">
 
@@ -631,12 +817,14 @@ canvas{
       id="send"
       class="btn"
       type="button"
+      aria-label="Senden"
     >➤</button>
 
     <button
       id="voice"
-      class="btn voice"
+      class="btn"
       type="button"
+      aria-label="Voice"
     >🎙</button>
 
   </div>
@@ -645,407 +833,45 @@ canvas{
 
 <div class="processing" id="processing">
 
-  <div class="processingText">
+  <div class="processingCenter">
 
-    <strong id="processingTitle">
+    <div class="pulseCircle"></div>
+
+    <div class="processingTitle" id="processingTitle">
       ANALYZING
-    </strong>
+    </div>
 
-    <span id="processingSub">
+    <div class="processingSub" id="processingSub">
       LUCEN CORE ACTIVE
-    </span>
+    </div>
 
   </div>
 
 </div>
 
+
 <script>
-
 /* =========================================================
-   LUCEN VISUAL CORE
+   DOM
    ========================================================= */
 
-const stars = document.getElementById("stars");
-const world = document.getElementById("world");
-const fx = document.getElementById("fx");
+const starsCanvas =
+  document.getElementById("stars");
 
-const sc = stars.getContext("2d");
-const wc = world.getContext("2d");
-const fc = fx.getContext("2d");
+const worldCanvas =
+  document.getElementById("world");
 
-let W = innerWidth;
-let H = innerHeight;
+const fxCanvas =
+  document.getElementById("fx");
 
-function resize(){
+const sc =
+  starsCanvas.getContext("2d");
 
-  W = innerWidth;
-  H = innerHeight;
+const wc =
+  worldCanvas.getContext("2d");
 
-  for(const c of [stars,world,fx]){
-    c.width = W * devicePixelRatio;
-    c.height = H * devicePixelRatio;
-    c.style.width = W+"px";
-    c.style.height = H+"px";
-
-    const ctx =
-      c === stars ? sc :
-      c === world ? wc : fc;
-
-    ctx.setTransform(
-      devicePixelRatio,
-      0,
-      0,
-      devicePixelRatio,
-      0,
-      0
-    );
-  }
-}
-
-addEventListener("resize",resize);
-resize();
-
-
-/* =========================================================
-   STAR FIELD
-   ========================================================= */
-
-const starList = [];
-
-for(let i=0;i<180;i++){
-
-  starList.push({
-    x:Math.random()*W,
-    y:Math.random()*H,
-    r:Math.random()*1.3+.15,
-    a:Math.random(),
-    s:Math.random()*.01+.002
-  });
-
-}
-
-function drawStars(){
-
-  sc.clearRect(0,0,W,H);
-
-  for(const s of starList){
-
-    s.a += s.s;
-
-    const alpha =
-      .18 +
-      Math.abs(Math.sin(s.a))*0.5;
-
-    sc.globalAlpha = alpha;
-
-    sc.beginPath();
-    sc.arc(
-      s.x,
-      s.y,
-      s.r,
-      0,
-      Math.PI*2
-    );
-
-    sc.fillStyle="#8ddfff";
-    sc.fill();
-  }
-
-  sc.globalAlpha=1;
-}
-
-
-/* =========================================================
-   WORLD / RADAR GRID
-   ========================================================= */
-
-let worldAngle=0;
-
-const targets = [];
-
-function createTarget(){
-
-  targets.push({
-
-    x:W*.18 + Math.random()*W*.64,
-    y:H*.25 + Math.random()*H*.32,
-
-    life:1,
-    size:2+Math.random()*3,
-
-    pulse:Math.random()*Math.PI*2
-
-  });
-
-  if(targets.length>14)
-    targets.shift();
-}
-
-function drawWorld(){
-
-  wc.clearRect(0,0,W,H);
-
-  const cx=W/2;
-  const cy=H*.43;
-
-  const radius=Math.min(W*.46,H*.29);
-
-  /* globe */
-
-  wc.save();
-
-  wc.translate(cx,cy);
-
-  wc.strokeStyle="rgba(50,190,240,.13)";
-  wc.lineWidth=1;
-
-  for(let i=-4;i<=4;i++){
-
-    const y=i*radius*.22;
-
-    wc.beginPath();
-
-    wc.ellipse(
-      0,
-      y,
-      radius,
-      Math.max(2,radius*.18),
-      0,
-      0,
-      Math.PI*2
-    );
-
-    wc.stroke();
-  }
-
-  for(let i=-5;i<=5;i++){
-
-    const x=i*radius*.18;
-
-    wc.beginPath();
-
-    wc.ellipse(
-      x,
-      0,
-      Math.max(2,radius*.2),
-      radius,
-      0,
-      0,
-      Math.PI*2
-    );
-
-    wc.stroke();
-  }
-
-  wc.beginPath();
-
-  wc.arc(
-    0,
-    0,
-    radius,
-    0,
-    Math.PI*2
-  );
-
-  wc.stroke();
-
-  /* latitude */
-
-  wc.strokeStyle="rgba(60,210,255,.07)";
-
-  for(let y=-radius;y<=radius;y+=18){
-
-    wc.beginPath();
-    wc.moveTo(-radius,y);
-    wc.lineTo(radius,y);
-    wc.stroke();
-
-  }
-
-  wc.restore();
-
-
-  /* radar sweep */
-
-  worldAngle += .008;
-
-  wc.save();
-
-  wc.translate(cx,cy);
-
-  wc.rotate(worldAngle);
-
-  const grad=wc.createLinearGradient(
-    0,0,
-    radius,0
-  );
-
-  grad.addColorStop(0,"rgba(70,230,255,0)");
-  grad.addColorStop(.75,"rgba(70,230,255,.08)");
-  grad.addColorStop(1,"rgba(100,240,255,.3)");
-
-  wc.fillStyle=grad;
-
-  wc.beginPath();
-  wc.moveTo(0,0);
-  wc.arc(
-    0,
-    0,
-    radius,
-    -.35,
-    .35
-  );
-
-  wc.closePath();
-  wc.fill();
-
-  wc.restore();
-
-
-  /* targets */
-
-  for(const t of targets){
-
-    t.pulse += .08;
-
-    const p =
-      1 +
-      Math.sin(t.pulse)*.5;
-
-    wc.beginPath();
-
-    wc.arc(
-      t.x,
-      t.y,
-      t.size*p,
-      0,
-      Math.PI*2
-    );
-
-    wc.fillStyle="rgba(100,235,255,.9)";
-    wc.shadowBlur=15;
-    wc.shadowColor="#29dfff";
-    wc.fill();
-
-    wc.shadowBlur=0;
-
-    wc.beginPath();
-
-    wc.arc(
-      t.x,
-      t.y,
-      10+p*3,
-      0,
-      Math.PI*2
-    );
-
-    wc.strokeStyle="rgba(60,220,255,.25)";
-    wc.stroke();
-
-  }
-}
-
-
-/* =========================================================
-   DATA PACKETS
-   ========================================================= */
-
-const packets=[];
-
-function spawnPacket(){
-
-  const start={
-    x:W/2,
-    y:H*.43
-  };
-
-  const target=
-    targets[
-      Math.floor(
-        Math.random()*targets.length
-      )
-    ];
-
-  if(!target)return;
-
-  packets.push({
-
-    x:start.x,
-    y:start.y,
-
-    tx:target.x,
-    ty:target.y,
-
-    p:0,
-
-    speed:.008+Math.random()*.018
-
-  });
-
-}
-
-function drawPackets(){
-
-  for(let i=packets.length-1;i>=0;i--){
-
-    const p=packets[i];
-
-    p.p += p.speed;
-
-    p.x +=
-      (p.tx-p.x)*.035;
-
-    p.y +=
-      (p.ty-p.y)*.035;
-
-    fc.beginPath();
-
-    fc.arc(
-      p.x,
-      p.y,
-      2,
-      0,
-      Math.PI*2
-    );
-
-    fc.fillStyle="#baf8ff";
-    fc.shadowBlur=12;
-    fc.shadowColor="#22dfff";
-    fc.fill();
-
-    fc.shadowBlur=0;
-
-    if(p.p>=1)
-      packets.splice(i,1);
-
-  }
-
-}
-
-
-/* =========================================================
-   FX LOOP
-   ========================================================= */
-
-function animationLoop(){
-
-  drawStars();
-  drawWorld();
-
-  fc.clearRect(0,0,W,H);
-
-  drawPackets();
-
-  requestAnimationFrame(animationLoop);
-
-}
-
-animationLoop();
-
-
-/* =========================================================
-   HUD STATE
-   ========================================================= */
+const fc =
+  fxCanvas.getContext("2d");
 
 const input =
   document.getElementById("input");
@@ -1056,17 +882,11 @@ const send =
 const voice =
   document.getElementById("voice");
 
-const log =
-  document.getElementById("log");
+const chat =
+  document.getElementById("chat");
 
-const progressFill =
-  document.getElementById("progressFill");
-
-const percent =
-  document.getElementById("percent");
-
-const operation =
-  document.getElementById("operation");
+const activity =
+  document.getElementById("activity");
 
 const processing =
   document.getElementById("processing");
@@ -1077,17 +897,20 @@ const processingTitle =
 const processingSub =
   document.getElementById("processingSub");
 
-const analysisValue =
-  document.getElementById("analysisValue");
+const progressFill =
+  document.getElementById("progressFill");
 
-const webValue =
-  document.getElementById("webValue");
+const percent =
+  document.getElementById("percent");
 
-const sourceValue =
-  document.getElementById("sourceValue");
+const operation =
+  document.getElementById("operation");
 
-const processValue =
-  document.getElementById("processValue");
+const mode =
+  document.getElementById("mode");
+
+const flash =
+  document.getElementById("flash");
 
 const tileAnalysis =
   document.getElementById("tileAnalysis");
@@ -1101,8 +924,571 @@ const tileSources =
 const tileProcess =
   document.getElementById("tileProcess");
 
+const analysisValue =
+  document.getElementById("analysisValue");
 
-function addLog(text){
+const webValue =
+  document.getElementById("webValue");
+
+const sourceValue =
+  document.getElementById("sourceValue");
+
+const processValue =
+  document.getElementById("processValue");
+
+
+/* =========================================================
+   CANVAS
+   ========================================================= */
+
+let W=innerWidth;
+let H=innerHeight;
+
+function resize(){
+
+  W=innerWidth;
+  H=innerHeight;
+
+  for(const canvas of [
+    starsCanvas,
+    worldCanvas,
+    fxCanvas
+  ]){
+
+    canvas.width=
+      W*devicePixelRatio;
+
+    canvas.height=
+      H*devicePixelRatio;
+
+    canvas.style.width=
+      W+"px";
+
+    canvas.style.height=
+      H+"px";
+
+    const ctx=
+      canvas===starsCanvas
+        ? sc
+        : canvas===worldCanvas
+          ? wc
+          : fc;
+
+    ctx.setTransform(
+      devicePixelRatio,
+      0,
+      0,
+      devicePixelRatio,
+      0,
+      0
+    );
+
+  }
+
+}
+
+addEventListener(
+  "resize",
+  resize
+);
+
+resize();
+
+
+/* =========================================================
+   STAR FIELD
+   ========================================================= */
+
+const stars=[];
+
+function buildStars(){
+
+  stars.length=0;
+
+  for(let i=0;i<220;i++){
+
+    stars.push({
+      x:Math.random()*W,
+      y:Math.random()*H,
+      r:.15+Math.random()*1.25,
+      speed:.002+Math.random()*.012,
+      phase:Math.random()*Math.PI*2
+    });
+
+  }
+
+}
+
+buildStars();
+
+function drawStars(){
+
+  sc.clearRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  for(const s of stars){
+
+    s.phase+=s.speed;
+
+    const alpha=
+      .12+
+      Math.abs(Math.sin(s.phase))*.5;
+
+    sc.globalAlpha=alpha;
+
+    sc.beginPath();
+
+    sc.arc(
+      s.x,
+      s.y,
+      s.r,
+      0,
+      Math.PI*2
+    );
+
+    sc.fillStyle="#a8eaff";
+    sc.fill();
+
+  }
+
+  sc.globalAlpha=1;
+
+}
+
+
+/* =========================================================
+   GLOBAL INTELLIGENCE MAP
+   ========================================================= */
+
+let radarAngle=0;
+
+const targets=[];
+
+function addTarget(){
+
+  const cx=W/2;
+  const cy=H*.43;
+
+  const radius=
+    Math.min(W*.43,H*.27);
+
+  const a=
+    Math.random()*Math.PI*2;
+
+  const r=
+    Math.sqrt(Math.random())*radius;
+
+  targets.push({
+    x:cx+Math.cos(a)*r,
+    y:cy+Math.sin(a)*r*.58,
+    pulse:Math.random()*Math.PI*2,
+    life:1
+  });
+
+  if(targets.length>18)
+    targets.shift();
+
+}
+
+function drawWorld(){
+
+  wc.clearRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  const cx=W/2;
+  const cy=H*.43;
+
+  const radius=
+    Math.min(W*.43,H*.27);
+
+  wc.save();
+
+  wc.translate(
+    cx,
+    cy
+  );
+
+  /* globe outline */
+
+  wc.beginPath();
+
+  wc.arc(
+    0,
+    0,
+    radius,
+    0,
+    Math.PI*2
+  );
+
+  wc.strokeStyle=
+    "rgba(70,210,255,.18)";
+
+  wc.lineWidth=1;
+  wc.stroke();
+
+
+  /* latitude */
+
+  for(let i=-4;i<=4;i++){
+
+    const y=
+      i*radius*.20;
+
+    wc.beginPath();
+
+    wc.ellipse(
+      0,
+      y,
+      radius,
+      Math.max(
+        2,
+        radius*.18
+      ),
+      0,
+      0,
+      Math.PI*2
+    );
+
+    wc.strokeStyle=
+      "rgba(70,210,255,.10)";
+
+    wc.stroke();
+
+  }
+
+
+  /* longitude */
+
+  for(let i=-5;i<=5;i++){
+
+    const x=
+      i*radius*.18;
+
+    wc.beginPath();
+
+    wc.ellipse(
+      x,
+      0,
+      Math.max(
+        2,
+        radius*.2
+      ),
+      radius,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    wc.strokeStyle=
+      "rgba(70,210,255,.08)";
+
+    wc.stroke();
+
+  }
+
+
+  /* horizontal scan lines */
+
+  for(
+    let y=-radius;
+    y<=radius;
+    y+=15
+  ){
+
+    wc.beginPath();
+
+    wc.moveTo(
+      -radius,
+      y
+    );
+
+    wc.lineTo(
+      radius,
+      y
+    );
+
+    wc.strokeStyle=
+      "rgba(80,220,255,.035)";
+
+    wc.stroke();
+
+  }
+
+  /* radar */
+
+  radarAngle+=.009;
+
+  wc.save();
+
+  wc.rotate(
+    radarAngle
+  );
+
+  const gradient=
+    wc.createLinearGradient(
+      0,
+      0,
+      radius,
+      0
+    );
+
+  gradient.addColorStop(
+    0,
+    "rgba(50,230,255,0)"
+  );
+
+  gradient.addColorStop(
+    .65,
+    "rgba(50,230,255,.04)"
+  );
+
+  gradient.addColorStop(
+    1,
+    "rgba(80,240,255,.26)"
+  );
+
+  wc.fillStyle=gradient;
+
+  wc.beginPath();
+
+  wc.moveTo(
+    0,
+    0
+  );
+
+  wc.arc(
+    0,
+    0,
+    radius,
+    -.35,
+    .35
+  );
+
+  wc.closePath();
+
+  wc.fill();
+
+  wc.restore();
+
+  wc.restore();
+
+
+  /* targets */
+
+  for(const t of targets){
+
+    t.pulse+=.08;
+
+    const pulse=
+      1+
+      Math.sin(t.pulse)*.45;
+
+    wc.beginPath();
+
+    wc.arc(
+      t.x,
+      t.y,
+      2.2*pulse,
+      0,
+      Math.PI*2
+    );
+
+    wc.fillStyle=
+      "rgba(120,245,255,.95)";
+
+    wc.shadowBlur=15;
+    wc.shadowColor="#27dcff";
+
+    wc.fill();
+
+    wc.shadowBlur=0;
+
+    wc.beginPath();
+
+    wc.arc(
+      t.x,
+      t.y,
+      8+4*pulse,
+      0,
+      Math.PI*2
+    );
+
+    wc.strokeStyle=
+      "rgba(60,220,255,.25)";
+
+    wc.stroke();
+
+  }
+
+}
+
+
+/* =========================================================
+   CONNECTION LINES
+   ========================================================= */
+
+function drawConnections(){
+
+  if(targets.length<2)
+    return;
+
+  for(let i=0;i<targets.length-1;i++){
+
+    const a=targets[i];
+    const b=targets[i+1];
+
+    fc.beginPath();
+
+    fc.moveTo(
+      a.x,
+      a.y
+    );
+
+    fc.lineTo(
+      b.x,
+      b.y
+    );
+
+    fc.strokeStyle=
+      "rgba(50,210,255,.10)";
+
+    fc.lineWidth=.7;
+
+    fc.stroke();
+
+  }
+
+}
+
+
+/* =========================================================
+   DATA PACKETS
+   ========================================================= */
+
+const packets=[];
+
+function spawnPacket(){
+
+  if(!targets.length)
+    return;
+
+  const target=
+    targets[
+      Math.floor(
+        Math.random()*targets.length
+      )
+    ];
+
+  packets.push({
+    x:W/2,
+    y:H*.43,
+    tx:target.x,
+    ty:target.y,
+    p:0,
+    speed:.012+Math.random()*.025
+  });
+
+  if(packets.length>45)
+    packets.shift();
+
+}
+
+function drawPackets(){
+
+  for(
+    let i=packets.length-1;
+    i>=0;
+    i--
+  ){
+
+    const p=packets[i];
+
+    p.p+=p.speed;
+
+    const ease=
+      1-Math.pow(
+        1-p.p,
+        3
+      );
+
+    p.x=
+      W/2+
+      (p.tx-W/2)*ease;
+
+    p.y=
+      H*.43+
+      (p.ty-H*.43)*ease;
+
+    fc.beginPath();
+
+    fc.arc(
+      p.x,
+      p.y,
+      1.7,
+      0,
+      Math.PI*2
+    );
+
+    fc.fillStyle="#d5fbff";
+
+    fc.shadowBlur=14;
+    fc.shadowColor="#21ddff";
+
+    fc.fill();
+
+    fc.shadowBlur=0;
+
+    if(p.p>=1)
+      packets.splice(i,1);
+
+  }
+
+}
+
+
+/* =========================================================
+   MAIN FX LOOP
+   ========================================================= */
+
+function render(){
+
+  drawStars();
+
+  drawWorld();
+
+  fc.clearRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  drawConnections();
+
+  drawPackets();
+
+  requestAnimationFrame(
+    render
+  );
+
+}
+
+render();
+
+
+/* =========================================================
+   ACTIVITY LOG
+   ========================================================= */
+
+function log(text){
 
   const line=
     document.createElement("div");
@@ -1112,40 +1498,95 @@ function addLog(text){
   line.textContent=
     "› "+text;
 
-  log.prepend(line);
+  activity.prepend(line);
 
-  while(log.children.length>5)
-    log.lastChild.remove();
+  while(
+    activity.children.length>4
+  ){
+
+    activity.lastChild.remove();
+
+  }
 
 }
 
 
-function setProgress(value,text){
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+function addChat(
+  text,
+  type="lucen"
+){
+
+  const el=
+    document.createElement("div");
+
+  el.className=
+    "message "+
+    (type==="user"?"user":"");
+
+  el.textContent=text;
+
+  chat.appendChild(el);
+
+  while(
+    chat.children.length>4
+  ){
+
+    chat.firstChild.remove();
+
+  }
+
+}
+
+
+/* =========================================================
+   HUD HELPERS
+   ========================================================= */
+
+function setProgress(
+  value,
+  label
+){
 
   const v=
     Math.max(
       0,
-      Math.min(100,value)
+      Math.min(
+        100,
+        value
+      )
     );
 
-  progressFill.style.width=v+"%";
+  progressFill.style.width=
+    v+"%";
+
   percent.textContent=
     Math.round(v)+"%";
 
-  if(text)
-    operation.textContent=text;
+  if(label)
+    operation.textContent=
+      label;
 
 }
 
+function activate(
+  tile,
+  value
+){
 
-function activate(tile,value){
+  tile.classList.add(
+    "active"
+  );
 
-  tile.classList.add("active");
-
-  if(value!==undefined){
+  if(value){
 
     const el=
-      tile.querySelector(".tileValue");
+      tile.querySelector(
+        ".tileValue"
+      );
 
     if(el)
       el.textContent=value;
@@ -1154,62 +1595,63 @@ function activate(tile,value){
 
 }
 
-
 function deactivate(tile){
-
-  tile.classList.remove("active");
-
+  tile.classList.remove(
+    "active"
+  );
 }
 
 
-function createHits(count=3){
+/* =========================================================
+   HIT FX
+   ========================================================= */
 
-  for(let i=0;i<count;i++){
+function visualHit(){
 
-    setTimeout(()=>{
+  const hit=
+    document.createElement("div");
 
-      const hit=
-        document.createElement("div");
+  hit.className="hit";
 
-      hit.className="hit";
+  hit.style.left=
+    (15+Math.random()*70)+"%";
 
-      hit.style.left=
-        (15+Math.random()*70)+"%";
+  hit.style.top=
+    (24+Math.random()*40)+"%";
 
-      hit.style.top=
-        (25+Math.random()*38)+"%";
+  document.body.appendChild(hit);
 
-      document.body.appendChild(hit);
+  flash.classList.remove("go");
 
-      hit.animate(
-        [
-          {
-            transform:"scale(.2)",
-            opacity:0
-          },
-          {
-            transform:"scale(1)",
-            opacity:1
-          },
-          {
-            transform:"scale(3)",
-            opacity:0
-          }
-        ],
-        {
-          duration:900,
-          easing:"ease-out"
-        }
-      );
+  void flash.offsetWidth;
 
-      setTimeout(
-        ()=>hit.remove(),
-        950
-      );
+  flash.classList.add("go");
 
-    },i*220);
+  hit.animate(
+    [
+      {
+        transform:"scale(.2)",
+        opacity:0
+      },
+      {
+        transform:"scale(1)",
+        opacity:1
+      },
+      {
+        transform:"scale(4)",
+        opacity:0
+      }
+    ],
+    {
+      duration:950,
+      easing:"ease-out"
+    }
+  );
 
-  }
+  setTimeout(
+    ()=>hit.remove(),
+    1000
+  );
 
 }
 
@@ -1220,30 +1662,385 @@ function createHits(count=3){
 
 function updateClock(){
 
-  const now=new Date();
-
-  document.getElementById("clock")
-    .textContent=
-      now.toLocaleTimeString(
-        "de-DE",
-        {
-          hour12:false
-        }
-      );
+  document.getElementById(
+    "clock"
+  ).textContent=
+    new Date().toLocaleTimeString(
+      "de-DE",
+      {
+        hour12:false
+      }
+    );
 
 }
 
-setInterval(updateClock,1000);
 updateClock();
+
+setInterval(
+  updateClock,
+  1000
+);
 
 
 /* =========================================================
-   PREPARE SEARCH VISUAL
+   AUDIO ENGINE
    ========================================================= */
+
+let audioCtx=null;
+let master=null;
+let ambient=null;
+
+function initAudio(){
+
+  if(audioCtx){
+
+    if(
+      audioCtx.state==="suspended"
+    ){
+
+      audioCtx.resume();
+
+    }
+
+    return;
+
+  }
+
+  audioCtx=
+    new (
+      window.AudioContext ||
+      window.webkitAudioContext
+    )();
+
+  master=
+    audioCtx.createGain();
+
+  master.gain.value=.42;
+
+  master.connect(
+    audioCtx.destination
+  );
+
+  ambient=
+    audioCtx.createGain();
+
+  ambient.gain.value=.025;
+
+  ambient.connect(
+    master
+  );
+
+  const o1=
+    audioCtx.createOscillator();
+
+  const o2=
+    audioCtx.createOscillator();
+
+  const g=
+    audioCtx.createGain();
+
+  o1.type="sine";
+  o2.type="triangle";
+
+  o1.frequency.value=43;
+  o2.frequency.value=86;
+
+  g.gain.value=.12;
+
+  o1.connect(g);
+  o2.connect(g);
+
+  g.connect(ambient);
+
+  o1.start();
+  o2.start();
+
+}
+
+function tone(
+  frequency,
+  duration=.12,
+  type="sine",
+  volume=.08,
+  slide=0
+){
+
+  if(!audioCtx)
+    return;
+
+  const now=
+    audioCtx.currentTime;
+
+  const osc=
+    audioCtx.createOscillator();
+
+  const gain=
+    audioCtx.createGain();
+
+  const filter=
+    audioCtx.createBiquadFilter();
+
+  osc.type=type;
+
+  osc.frequency.setValueAtTime(
+    frequency,
+    now
+  );
+
+  if(slide){
+
+    osc.frequency.exponentialRampToValueAtTime(
+      Math.max(
+        25,
+        frequency+slide
+      ),
+      now+duration
+    );
+
+  }
+
+  filter.type="lowpass";
+
+  filter.frequency.value=
+    Math.min(
+      10000,
+      frequency*5
+    );
+
+  gain.gain.setValueAtTime(
+    .0001,
+    now
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    volume,
+    now+.015
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    .0001,
+    now+duration
+  );
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(master);
+
+  osc.start(now);
+  osc.stop(
+    now+duration+.04
+  );
+
+}
+
+function sweep(){
+
+  if(!audioCtx)
+    return;
+
+  const now=
+    audioCtx.currentTime;
+
+  const osc=
+    audioCtx.createOscillator();
+
+  const gain=
+    audioCtx.createGain();
+
+  osc.type="sawtooth";
+
+  osc.frequency.setValueAtTime(
+    120,
+    now
+  );
+
+  osc.frequency.exponentialRampToValueAtTime(
+    2200,
+    now+.5
+  );
+
+  gain.gain.setValueAtTime(
+    .0001,
+    now
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    .12,
+    now+.05
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    .0001,
+    now+.5
+  );
+
+  osc.connect(gain);
+  gain.connect(master);
+
+  osc.start(now);
+  osc.stop(
+    now+.52
+  );
+
+}
+
+function searchSound(){
+
+  initAudio();
+
+  tone(
+    110,
+    .20,
+    "sine",
+    .12,
+    190
+  );
+
+  setTimeout(
+    ()=>{
+      tone(
+        300,
+        .16,
+        "triangle",
+        .09,
+        500
+      );
+    },
+    90
+  );
+
+  setTimeout(
+    sweep,
+    120
+  );
+
+}
+
+function packetSound(){
+
+  initAudio();
+
+  tone(
+    650+Math.random()*700,
+    .035,
+    "square",
+    .018,
+    80
+  );
+
+}
+
+function hitSound(){
+
+  initAudio();
+
+  tone(
+    880,
+    .09,
+    "sine",
+    .11,
+    400
+  );
+
+  setTimeout(
+    ()=>{
+      tone(
+        1320,
+        .11,
+        "sine",
+        .08,
+        -150
+      );
+    },
+    55
+  );
+
+}
+
+function completeSound(){
+
+  initAudio();
+
+  [
+    440,
+    554,
+    659,
+    880
+  ].forEach(
+    (frequency,index)=>{
+
+      setTimeout(
+        ()=>{
+          tone(
+            frequency,
+            .24,
+            "sine",
+            .10
+          );
+        },
+        index*85
+      );
+
+    }
+  );
+
+}
+
+function errorSound(){
+
+  initAudio();
+
+  tone(
+    180,
+    .18,
+    "sawtooth",
+    .12,
+    -70
+  );
+
+  setTimeout(
+    ()=>{
+      tone(
+        105,
+        .27,
+        "square",
+        .07,
+        -30
+      );
+    },
+    100
+  );
+
+}
+
+
+/* =========================================================
+   SEARCH ANIMATION
+   ========================================================= */
+
+let visualTimers=[];
+
+function clearVisualTimers(){
+
+  visualTimers.forEach(
+    clearTimeout
+  );
+
+  visualTimers=[];
+
+}
 
 function startSearchVisual(){
 
-  processing.classList.add("show");
+  clearVisualTimers();
+
+  initAudio();
+
+  searchSound();
+
+  processing.classList.add(
+    "show"
+  );
 
   processingTitle.textContent=
     "ANALYZING";
@@ -1251,10 +2048,8 @@ function startSearchVisual(){
   processingSub.textContent=
     "INITIALIZING LUCEN CORE";
 
-  setProgress(
-    8,
-    "INITIALIZING"
-  );
+  mode.textContent=
+    "NEURAL CORE ACTIVE";
 
   activate(
     tileAnalysis,
@@ -1266,91 +2061,134 @@ function startSearchVisual(){
     "ACTIVE"
   );
 
-  addLog(
+  setProgress(
+    7,
+    "INITIALIZING"
+  );
+
+  log(
     "Neural core initialized"
   );
 
-  setTimeout(()=>{
+  visualTimers.push(
+    setTimeout(
+      ()=>{
+        processingTitle.textContent=
+          "SEARCHING";
 
-    processingTitle.textContent=
-      "SEARCHING";
+        processingSub.textContent=
+          "GLOBAL WEB INTELLIGENCE";
 
-    processingSub.textContent=
-      "GLOBAL WEB INTELLIGENCE";
+        mode.textContent=
+          "GLOBAL SEARCH ACTIVE";
 
-    setProgress(
-      32,
-      "GLOBAL SEARCH"
-    );
+        activate(
+          tileWeb,
+          "SEARCHING"
+        );
 
-    activate(
-      tileWeb,
-      "SEARCHING"
-    );
+        setProgress(
+          28,
+          "GLOBAL SEARCH"
+        );
 
-    webValue.textContent=
-      "ACTIVE";
+        log(
+          "Global intelligence search started"
+        );
 
-    addLog(
-      "Global web search started"
-    );
+        for(let i=0;i<8;i++){
 
-    for(let i=0;i<5;i++)
-      setTimeout(createTarget,i*180);
+          visualTimers.push(
+            setTimeout(
+              ()=>{
+                addTarget();
+                hitSound();
+                visualHit();
+              },
+              i*150
+            )
+          );
 
-    for(let i=0;i<15;i++)
-      setTimeout(spawnPacket,i*120);
+        }
 
-  },450);
+      },
+      450
+    )
+  );
 
+  visualTimers.push(
+    setTimeout(
+      ()=>{
 
-  setTimeout(()=>{
+        processingTitle.textContent=
+          "PROCESSING";
 
-    processingTitle.textContent=
-      "PROCESSING";
+        processingSub.textContent=
+          "SOURCE ANALYSIS";
 
-    processingSub.textContent=
-      "SOURCE ANALYSIS";
+        mode.textContent=
+          "SOURCE ANALYSIS";
 
-    setProgress(
-      58,
-      "PROCESSING SOURCES"
-    );
+        activate(
+          tileSources,
+          "SCANNING"
+        );
 
-    activate(
-      tileSources,
-      "SCANNING"
-    );
+        setProgress(
+          55,
+          "PROCESSING SOURCES"
+        );
 
-    sourceValue.textContent=
-      Math.floor(
-        3+Math.random()*12
-      );
+        sourceValue.textContent=
+          String(
+            4+
+            Math.floor(
+              Math.random()*11
+            )
+          );
 
-    addLog(
-      "Sources being analyzed"
-    );
+        log(
+          "Source extraction active"
+        );
 
-    createHits(5);
+      },
+      1100
+    )
+  );
 
-  },1050);
+  visualTimers.push(
+    setTimeout(
+      ()=>{
 
+        setProgress(
+          73,
+          "CROSS CHECKING"
+        );
 
-  setTimeout(()=>{
+        log(
+          "Cross-source verification active"
+        );
 
-    setProgress(
-      78,
-      "CROSS CHECKING"
-    );
+        for(let i=0;i<4;i++){
 
-    addLog(
-      "Cross-source verification active"
-    );
+          visualTimers.push(
+            setTimeout(
+              ()=>{
+                visualHit();
+                hitSound();
+              },
+              i*180
+            )
+          );
 
-  },1600);
+        }
+
+      },
+      1650
+    )
+  );
 
 }
-
 
 function finishSearchVisual(){
 
@@ -1359,6 +2197,9 @@ function finishSearchVisual(){
 
   processingSub.textContent=
     "LUCEN RESPONSE READY";
+
+  mode.textContent=
+    "OPERATION COMPLETE";
 
   setProgress(
     100,
@@ -1374,58 +2215,127 @@ function finishSearchVisual(){
   processValue.textContent=
     "COMPLETE";
 
-  addLog(
+  completeSound();
+
+  visualHit();
+  visualHit();
+
+  log(
     "Analysis completed successfully"
   );
 
-  createHits(3);
+  setTimeout(
+    ()=>{
+      processing.classList.remove(
+        "show"
+      );
 
-  setTimeout(()=>{
+      deactivate(
+        tileAnalysis
+      );
 
-    processing.classList.remove("show");
+      deactivate(
+        tileWeb
+      );
 
-    deactivate(tileAnalysis);
-    deactivate(tileWeb);
-    deactivate(tileSources);
-    deactivate(tileProcess);
+      deactivate(
+        tileSources
+      );
 
-  },900);
+      deactivate(
+        tileProcess
+      );
+
+      mode.textContent=
+        "SYSTEM READY";
+
+    },
+    950
+  );
 
 }
+
+
+/* =========================================================
+   CONTINUOUS DATA TRAFFIC
+   ========================================================= */
+
+setInterval(
+  ()=>{
+
+    if(
+      processing.classList.contains(
+        "show"
+      )
+    ){
+
+      spawnPacket();
+
+      if(
+        Math.random()>.55
+      ){
+
+        packetSound();
+
+      }
+
+    }
+
+  },
+  170
+);
 
 
 /* =========================================================
    LUCEN BACKEND
    ========================================================= */
 
-async function askLucen(message){
-
-  if(!message.trim())
-    return;
+async function askLucen(
+  message
+){
 
   startSearchVisual();
 
   const lower=
     message.toLowerCase();
 
-  const looksLikeSearch=[
+  const searchTerms=[
     "suche",
     "such",
     "internet",
     "web",
     "recherche",
+    "recherchiere",
     "aktuell",
+    "aktuelle",
+    "aktuellen",
     "heute",
+    "heutige",
     "jetzt",
     "news",
     "nachrichten",
     "preis",
+    "preise",
     "wetter",
     "öffnungszeiten",
-    "quelle"
-  ].some(
-    x=>lower.includes(x)
-  );
+    "quelle",
+    "quellen"
+  ];
+
+  const isSearch=
+    searchTerms.some(
+      word =>
+        lower.includes(word)
+    );
+
+  if(isSearch){
+
+    activate(
+      tileWeb,
+      "SEARCHING"
+    );
+
+  }
 
   try{
 
@@ -1447,33 +2357,36 @@ async function askLucen(message){
     const data=
       await response.json();
 
-    if(!response.ok)
+    if(!response.ok){
+
       throw new Error(
         data?.error ||
         "LUCEN Backend Fehler"
       );
 
+    }
+
     setProgress(
-      92,
+      91,
       "GENERATING RESPONSE"
     );
 
-    addLog(
+    mode.textContent=
+      "RESPONSE SYNTHESIS";
+
+    log(
       "Response synthesis active"
     );
 
-    if(data?.analysis){
-
-      const modules=
-        data.analysis.modules ||
-        [];
+    if(data?.analysis?.modules){
 
       for(
-        const module of modules
+        const module
+        of data.analysis.modules
       ){
 
-        addLog(
-          module
+        log(
+          String(module)
         );
 
       }
@@ -1482,32 +2395,54 @@ async function askLucen(message){
 
     finishSearchVisual();
 
-    return data?.reply ||
-      "Keine Antwort erhalten.";
+    return(
+      data?.reply ||
+      "Verstanden."
+    );
 
   }catch(error){
+
+    console.error(
+      "LUCEN:",
+      error
+    );
+
+    errorSound();
 
     processingTitle.textContent=
       "ERROR";
 
     processingSub.textContent=
-      error.message ||
-      "Connection failure";
+      error?.message ||
+      "CONNECTION FAILURE";
 
-    operation.textContent=
+    mode.textContent=
       "SYSTEM ERROR";
 
-    addLog(
-      "ERROR: "+
-      (error.message || "Unknown")
+    setProgress(
+      0,
+      "ERROR"
     );
 
-    progressFill.style.width="0%";
-    percent.textContent="ERR";
+    log(
+      "ERROR: "+
+      (
+        error?.message ||
+        "Unknown"
+      )
+    );
+
+    setTimeout(
+      ()=>{
+        processing.classList.remove(
+          "show"
+        );
+      },
+      1500
+    );
 
     return(
-      "Ich konnte LUCEN gerade nicht erreichen. "+
-      (error.message || "")
+      "LUCEN konnte die Anfrage gerade nicht verarbeiten."
     );
 
   }
@@ -1519,7 +2454,12 @@ async function askLucen(message){
    SEND
    ========================================================= */
 
+let busy=false;
+
 async function sendMessage(){
+
+  if(busy)
+    return;
 
   const message=
     input.value.trim();
@@ -1527,25 +2467,32 @@ async function sendMessage(){
   if(!message)
     return;
 
+  busy=true;
+
+  initAudio();
+
   input.value="";
 
-  addLog(
-    "USER INPUT RECEIVED"
+  addChat(
+    message,
+    "user"
+  );
+
+  log(
+    "User command received"
   );
 
   const answer=
-    await askLucen(message);
+    await askLucen(
+      message
+    );
 
-  /*
-   * Antwort anzeigen
-   * Die vorhandene Oberfläche kann später
-   * noch um eine echte Chat-Historie erweitert werden.
-   */
-
-  addLog(
-    "LUCEN: "+
-    String(answer).slice(0,100)
+  addChat(
+    answer,
+    "lucen"
   );
+
+  busy=false;
 
 }
 
@@ -1556,25 +2503,396 @@ send.addEventListener(
 
 input.addEventListener(
   "keydown",
-  e=>{
+  event=>{
 
-    if(e.key==="Enter")
+    if(
+      event.key==="Enter"
+    ){
+
+      event.preventDefault();
+
       sendMessage();
+
+    }
 
   }
 );
 
 
 /* =========================================================
-   INIT
+   VOICE — REALTIME WEBRTC
    ========================================================= */
 
-addLog(
-  "LUCEN SYSTEM ONLINE"
+let pc=null;
+let dc=null;
+let remoteAudio=null;
+let voiceStream=null;
+let voiceActive=false;
+
+async function startVoice(){
+
+  initAudio();
+
+  if(voiceActive){
+
+    stopVoice();
+
+    return;
+
+  }
+
+  try{
+
+    addLog(
+      "VOICE SYSTEM INITIALIZING"
+    );
+
+    voice.classList.add(
+      "live"
+    );
+
+    voice.textContent=
+      "●";
+
+    voiceActive=true;
+
+    mode.textContent=
+      "VOICE SYSTEM ACTIVE";
+
+    pc=
+      new RTCPeerConnection();
+
+    remoteAudio=
+      document.createElement(
+        "audio"
+      );
+
+    remoteAudio.autoplay=true;
+    remoteAudio.playsInline=true;
+
+    document.body.appendChild(
+      remoteAudio
+    );
+
+    pc.ontrack=
+      event=>{
+
+        if(
+          event.streams &&
+          event.streams[0]
+        ){
+
+          remoteAudio.srcObject=
+            event.streams[0];
+
+          remoteAudio
+            .play()
+            .catch(
+              ()=>{}
+            );
+
+        }
+
+      };
+
+    voiceStream=
+      await navigator
+        .mediaDevices
+        .getUserMedia({
+          audio:true
+        });
+
+    voiceStream
+      .getTracks()
+      .forEach(
+        track=>{
+
+          pc.addTrack(
+            track,
+            voiceStream
+          );
+
+        }
+      );
+
+    dc=
+      pc.createDataChannel(
+        "oai-events"
+      );
+
+    dc.onopen=
+      ()=>{
+
+        addLog(
+          "VOICE CHANNEL CONNECTED"
+        );
+
+        tone(
+          660,
+          .12,
+          "sine",
+          .08,
+          220
+        );
+
+      };
+
+    dc.onmessage=
+      event=>{
+
+        try{
+
+          const data=
+            JSON.parse(
+              event.data
+            );
+
+          if(
+            data.type===
+            "response.created"
+          ){
+
+            mode.textContent=
+              "VOICE RESPONSE ACTIVE";
+
+            log(
+              "Voice response active"
+            );
+
+          }
+
+          if(
+            data.type===
+            "response.done"
+          ){
+
+            mode.textContent=
+              "VOICE READY";
+
+            log(
+              "Voice response complete"
+            );
+
+          }
+
+        }catch{}
+
+      };
+
+    const offer=
+      await pc.createOffer();
+
+    await pc.setLocalDescription(
+      offer
+    );
+
+    const response=
+      await fetch(
+        "/.netlify/functions/realtime",
+        {
+          method:"POST",
+          headers:{
+            "Content-Type":
+              "application/sdp"
+          },
+          body:offer.sdp
+        }
+      );
+
+    if(!response.ok){
+
+      const raw=
+        await response.text();
+
+      throw new Error(
+        raw ||
+        "Realtime connection failed"
+      );
+
+    }
+
+    const answer=
+      await response.text();
+
+    await pc.setRemoteDescription({
+      type:"answer",
+      sdp:answer
+    });
+
+    addLog(
+      "LUCEN VOICE ONLINE"
+    );
+
+    mode.textContent=
+      "VOICE ONLINE";
+
+  }catch(error){
+
+    console.error(
+      "VOICE:",
+      error
+    );
+
+    errorSound();
+
+    addLog(
+      "VOICE ERROR: "+
+      (
+        error?.message ||
+        "Unknown"
+      )
+    );
+
+    stopVoice();
+
+  }
+
+}
+
+function stopVoice(){
+
+  voiceActive=false;
+
+  voice.classList.remove(
+    "live"
+  );
+
+  voice.textContent=
+    "🎙";
+
+  if(
+    voiceStream
+  ){
+
+    voiceStream
+      .getTracks()
+      .forEach(
+        track=>{
+          try{
+            track.stop();
+          }catch{}
+        }
+      );
+
+  }
+
+  voiceStream=null;
+
+  if(pc){
+
+    pc.getSenders()
+      .forEach(
+        sender=>{
+          try{
+            sender.track?.stop();
+          }catch{}
+        }
+      );
+
+    try{
+      pc.close();
+    }catch{}
+
+  }
+
+  pc=null;
+  dc=null;
+
+  if(remoteAudio){
+
+    remoteAudio.srcObject=null;
+
+    try{
+      remoteAudio.remove();
+    }catch{}
+
+  }
+
+  remoteAudio=null;
+
+  mode.textContent=
+    "SYSTEM READY";
+
+  addLog(
+    "VOICE SYSTEM OFFLINE"
+  );
+
+}
+
+voice.addEventListener(
+  "click",
+  startVoice
 );
 
-addLog(
-  "Awaiting command..."
+
+/* =========================================================
+   AUDIO UNLOCK FOR IPHONE
+   ========================================================= */
+
+document.addEventListener(
+  "touchstart",
+  ()=>{
+    try{
+      initAudio();
+    }catch{}
+  },
+  {
+    once:true,
+    passive:true
+  }
+);
+
+document.addEventListener(
+  "click",
+  ()=>{
+    try{
+      initAudio();
+    }catch{}
+  },
+  {
+    once:true
+  }
+);
+
+
+/* =========================================================
+   INITIAL SYSTEM BOOT
+   ========================================================= */
+
+setTimeout(
+  ()=>{
+    log(
+      "LUCEN CORE ONLINE"
+    );
+  },
+  200
+);
+
+setTimeout(
+  ()=>{
+    log(
+      "GLOBAL INTELLIGENCE NETWORK READY"
+    );
+  },
+  550
+);
+
+setTimeout(
+  ()=>{
+    log(
+      "VOICE INTERFACE READY"
+    );
+  },
+  900
+);
+
+setTimeout(
+  ()=>{
+    log(
+      "AWAITING COMMAND"
+    );
+  },
+  1250
 );
 
 </script>
