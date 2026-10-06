@@ -1,6 +1,3 @@
-// LUCEN v2 — MASTER TEXT + INTERNET CORE
-// Voice / realtime.js bleibt unangetastet.
-
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type",
@@ -13,15 +10,15 @@ function json(data, status = 200) {
     status,
     headers: {
       ...CORS,
-      "Content-Type": "application/json; charset=utf-8"
+      "Content-Type": "application/json"
     }
   });
 }
 
-async function openAI(body) {
-  const apiKey = process.env.OPENAI_API_KEY;
+async function callOpenAI(body) {
+  const key = process.env.OPENAI_API_KEY;
 
-  if (!apiKey) {
+  if (!key) {
     throw new Error("OPENAI_API_KEY fehlt in Netlify.");
   }
 
@@ -30,205 +27,60 @@ async function openAI(body) {
     {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        "Authorization": `Bearer ${key}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify(body)
     }
   );
 
-  const text = await response.text();
+  const raw = await response.text();
 
   let data;
 
   try {
-    data = JSON.parse(text);
+    data = JSON.parse(raw);
   } catch {
     data = {};
   }
 
   if (!response.ok) {
-    console.error("OPENAI ERROR:", response.status, text);
+    console.error("OPENAI:", response.status, raw);
 
     throw new Error(
       data?.error?.message ||
-      `OpenAI Fehler ${response.status}`
+      `OpenAI HTTP ${response.status}`
     );
   }
 
   return data;
 }
 
-function getOutputText(data) {
-  if (typeof data?.output_text === "string") {
+function getText(data) {
+  if (data?.output_text) {
     return data.output_text.trim();
   }
 
-  let result = "";
+  let text = "";
 
   for (const item of data?.output || []) {
-    if (item?.type !== "message") continue;
+    if (item.type !== "message") continue;
 
-    for (const content of item?.content || []) {
+    for (const content of item.content || []) {
       if (
-        content?.type === "output_text" &&
-        typeof content.text === "string"
+        content.type === "output_text" &&
+        content.text
       ) {
-        result += content.text;
+        text += content.text;
       }
     }
   }
 
-  return result.trim();
-}
-
-function wantsWebSearch(message) {
-  const text = message.toLowerCase();
-
-  const keywords = [
-    "internet",
-    "web",
-    "online",
-    "suche",
-    "such",
-    "recherchiere",
-    "recherche",
-    "aktuell",
-    "aktuelle",
-    "aktuellen",
-    "heute",
-    "heutige",
-    "jetzt",
-    "momentan",
-    "news",
-    "nachrichten",
-    "preis",
-    "preise",
-    "kosten",
-    "öffnungszeiten",
-    "wetter",
-    "google",
-    "quelle",
-    "quellen"
-  ];
-
-  return keywords.some(word => text.includes(word));
-}
-
-async function normalChat(message, context = "") {
-  const data = await openAI({
-    model: "gpt-5-mini",
-
-    input: [
-      {
-        role: "system",
-        content: `
-Du bist LUCEN, ein hochentwickelter persönlicher KI-Assistent.
-
-Sprache:
-Antworte auf Deutsch, wenn der Benutzer Deutsch spricht.
-
-Persönlichkeit:
-ruhig, intelligent, souverän, natürlich,
-präzise und hilfreich.
-
-Sprich nicht unnötig lang.
-Keine Roboterformulierungen.
-Keine erfundenen Fakten.
-
-Du bist der Text-Core von LUCEN.
-        `.trim()
-      },
-      {
-        role: "user",
-        content: context
-          ? `Kontext:\n${context}\n\nBenutzer:\n${message}`
-          : message
-      }
-    ]
-  });
-
-  return getOutputText(data);
-}
-
-async function webSearch(message, context = "") {
-  const data = await openAI({
-    model: "gpt-5-mini",
-
-    tools: [
-      {
-        type: "web_search"
-      }
-    ],
-
-    input: [
-      {
-        role: "system",
-        content: `
-Du bist LUCENs Internet-Rechercheeinheit.
-
-Nutze die Websuche für aktuelle oder externe Informationen.
-
-WICHTIG:
-- Recherchiere tatsächlich im Internet.
-- Erfinde keine Quellen.
-- Wenn Informationen zeitabhängig sind, bevorzuge aktuelle Ergebnisse.
-- Vergleiche Informationen, wenn mehrere Quellen sinnvoll sind.
-- Antworte auf Deutsch, wenn der Benutzer Deutsch spricht.
-- Sei präzise und verständlich.
-- Nenne am Ende die wichtigsten verwendeten Quellen,
-  sofern Quelleninformationen verfügbar sind.
-
-Du kannst Informationen aus dem Internet analysieren
-und anschließend verständlich für den Benutzer zusammenfassen.
-        `.trim()
-      },
-      {
-        role: "user",
-        content: context
-          ? `Kontext:\n${context}\n\nRechercheauftrag:\n${message}`
-          : message
-      }
-    ]
-  });
-
-  return getOutputText(data);
-}
-
-async function calculate(message) {
-  const expression = message
-    .replace(/,/g, ".")
-    .replace(/×/g, "*")
-    .replace(/÷/g, "/")
-    .replace(/−/g, "-")
-    .replace(/[^\d+\-*/().% ]/g, "")
-    .trim();
-
-  if (!expression) {
-    return null;
-  }
-
-  if (!/^[\d+\-*/().% ]+$/.test(expression)) {
-    return null;
-  }
-
-  try {
-    const result = Function(
-      `"use strict"; return (${expression})`
-    )();
-
-    if (!Number.isFinite(result)) {
-      return null;
-    }
-
-    return result;
-  } catch {
-    return null;
-  }
+  return text.trim();
 }
 
 export default async function handler(req) {
-  // CORS
+
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -236,19 +88,15 @@ export default async function handler(req) {
     });
   }
 
-  // Nur POST
   if (req.method !== "POST") {
-    return json(
-      {
-        ok: false,
-        success: false,
-        error: "Method not allowed"
-      },
-      405
-    );
+    return json({
+      ok: false,
+      error: "Method not allowed"
+    }, 405);
   }
 
   try {
+
     const body = await req.json();
 
     const message =
@@ -256,85 +104,116 @@ export default async function handler(req) {
         ? body.message.trim()
         : "";
 
-    const context =
-      typeof body?.context === "string"
-        ? body.context
-        : "";
-
     if (!message) {
-      return json(
-        {
-          ok: false,
-          success: false,
-          error: "Keine Nachricht erhalten."
-        },
-        400
+      return json({
+        ok: false,
+        error: "Keine Nachricht erhalten."
+      }, 400);
+    }
+
+    /*
+     * ---------------------------------------
+     * LUCEN INTERNET SEARCH
+     * ---------------------------------------
+     */
+
+    const searchWords = [
+      "suche",
+      "such",
+      "internet",
+      "web",
+      "recherche",
+      "recherchiere",
+      "aktuell",
+      "aktuelle",
+      "aktuellen",
+      "heute",
+      "heutige",
+      "jetzt",
+      "nachrichten",
+      "news",
+      "preis",
+      "preise",
+      "wetter",
+      "öffnungszeiten",
+      "quelle",
+      "quellen"
+    ];
+
+    const lower = message.toLowerCase();
+
+    const useWebSearch =
+      searchWords.some(word =>
+        lower.includes(word)
       );
-    }
 
-    console.log("LUCEN REQUEST:", message);
+    /*
+     * ---------------------------------------
+     * WEB SEARCH
+     * ---------------------------------------
+     */
 
-    // -----------------------------------------
-    // CALCULATOR
-    // -----------------------------------------
+    if (useWebSearch) {
 
-    const calculation =
-      await calculate(message);
+      console.log(
+        "LUCEN WEB SEARCH:",
+        message
+      );
 
-    const looksLikeCalculation =
-      /^[\d\s()+\-*/%.×÷−]+$/.test(message);
+      const data = await callOpenAI({
 
-    if (
-      calculation !== null &&
-      looksLikeCalculation
-    ) {
-      return json({
-        ok: true,
-        success: true,
-        type: "calculation",
-        intent: "calculation",
+        model: "gpt-5-mini",
 
-        reply:
-          `Das Ergebnis ist ${calculation}.`,
+        tools: [
+          {
+            type: "web_search"
+          }
+        ],
 
-        result: calculation,
+        input: [
+          {
+            role: "system",
+            content: `
+Du bist LUCEN.
 
-        analysis: {
-          status: "complete",
-          modules: [
-            "ANALYSIS",
-            "CALCULATION"
-          ]
-        }
+Der Benutzer möchte eine aktuelle
+Internet-Recherche.
+
+Nutze die Websuche.
+
+Arbeite sorgfältig:
+- aktuelle Informationen
+- mehrere Quellen wenn sinnvoll
+- keine erfundenen Informationen
+- keine erfundenen Quellen
+- Deutsch wenn der Benutzer Deutsch spricht
+- kurz und verständlich antworten
+
+Wenn Quelleninformationen verfügbar sind,
+nenne die wichtigsten Quellen am Ende.
+            `.trim()
+          },
+          {
+            role: "user",
+            content: message
+          }
+        ]
       });
-    }
 
-    // -----------------------------------------
-    // INTERNET
-    // -----------------------------------------
-
-    if (wantsWebSearch(message)) {
-      console.log("LUCEN MODE: WEB SEARCH");
-
-      const answer =
-        await webSearch(message, context);
+      const answer = getText(data);
 
       return json({
         ok: true,
         success: true,
-
         type: "research",
         intent: "research",
 
         reply:
           answer ||
-          "Ich konnte keine verwertbare Information aus der Websuche erhalten.",
-
-        query: message,
+          "Die Websuche hat keine Antwort zurückgegeben.",
 
         analysis: {
           status: "complete",
-
           modules: [
             "ANALYSIS",
             "WORLD SEARCH",
@@ -346,29 +225,54 @@ export default async function handler(req) {
       });
     }
 
-    // -----------------------------------------
-    // NORMAL CHAT
-    // -----------------------------------------
+    /*
+     * ---------------------------------------
+     * NORMAL CHAT
+     * ---------------------------------------
+     */
 
-    console.log("LUCEN MODE: CHAT");
+    const data = await callOpenAI({
 
-    const answer =
-      await normalChat(message, context);
+      model: "gpt-5-mini",
+
+      input: [
+        {
+          role: "system",
+          content: `
+Du bist LUCEN, ein hochentwickelter
+persönlicher KI-Assistent.
+
+Sprich Deutsch, wenn der Benutzer Deutsch spricht.
+
+Sei:
+ruhig,
+intelligent,
+präzise,
+natürlich
+und hilfreich.
+
+Keine unnötig langen Antworten.
+          `.trim()
+        },
+        {
+          role: "user",
+          content: message
+        }
+      ]
+    });
 
     return json({
       ok: true,
       success: true,
-
       type: "chat",
       intent: "chat",
 
       reply:
-        answer ||
+        getText(data) ||
         "Verstanden.",
 
       analysis: {
         status: "complete",
-
         modules: [
           "ANALYSIS",
           "AI CORE",
@@ -378,24 +282,22 @@ export default async function handler(req) {
     });
 
   } catch (error) {
+
     console.error(
-      "LUCEN MASTER ERROR:",
+      "LUCEN ERROR:",
       error
     );
 
-    return json(
-      {
-        ok: false,
-        success: false,
+    return json({
+      ok: false,
+      success: false,
 
-        error:
-          error?.message ||
-          "Unbekannter Fehler",
+      error:
+        error?.message ||
+        "Unbekannter Fehler",
 
-        reply:
-          "LUCEN konnte den KI-Core momentan nicht erreichen."
-      },
-      500
-    );
+      reply:
+        "Die Internetverbindung von LUCEN konnte nicht hergestellt werden."
+    }, 500);
   }
 }
